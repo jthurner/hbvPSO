@@ -1,0 +1,64 @@
+\inputencoding{utf8}
+\HeaderA{monthly2daily}{Disaggregate Daily Means by Month-of-the-year into Daily Timeseries}{monthly2daily}
+%
+\begin{Description}\relax
+Wrapper around na.approx/na.spline which disaggregates monthly to daily values
+by linear interpolation or cubic spline interpolation, respectively.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+monthly2daily(from, to, values, FUN = zoo::na.spline, ...)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{from}] Beginning of the interpolated time series, as Date object
+
+\item[\code{to}] End of the interpolated time series, as Date object
+
+\item[\code{values}] Vector of daily mean values for each month (length=12)
+
+\item[\code{FUN}] interpolation function to use, must be either na.approx (linear) or na.spline (spline)
+
+\item[\code{...}] further arguments passed to approx/spline via na.approx/na.spline
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Details}\relax
+The values for interpolation are mean daily data grouped by month (i.e. 12 values corresponding to
+the calendar month, as produced by hydroTSM::monthlyfunction with FUN=mean).
+
+Monthly input data is fixed to the middle of each month for the interpolation, and values at
+the left and right margins are interpolated by extending the monthly datapoints accordingly.
+\end{Details}
+%
+\begin{Value}
+A daily timeseries (zoo) interpolated from daily mean values for each month of the year
+\end{Value}
+%
+\begin{Author}\relax
+Joschka Thurner, \email{joschka.thurner@th-koeln.de}
+\end{Author}
+%
+\begin{Examples}
+\begin{ExampleCode}
+m2d <- monthly2daily(as.Date("2000-01-01"),as.Date("2001-12-31"),values=c(0:6,5:1),FUN=zoo::na.approx)
+tail(m2d)
+## Not run: 
+# using na.approx directly for comparison
+m <- zooreg(rep(c(0:6,5:1),2),as.yearmon("2000-01-01"),freq = 12)
+sq <- seq(as.Date(start(m)), as.Date(end(m), frac = 1), by = "day")
+zd <- na.approx(m, x = as.Date, xout = sq)
+
+# plot both results
+# na.approx is missing values at the right margin, and sets the monthly value
+# at the first day of the month
+plot(m2d,col="green")
+lines(zd,col="red")
+legend('topright', c("na.approx","monthly2daily"), col = 2:3, lty = 1)
+
+## End(Not run)
+\end{ExampleCode}
+\end{Examples}
