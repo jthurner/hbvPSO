@@ -144,6 +144,7 @@ hbv_pso <- function(prec,
   	  stop("If \"warmup\" is a date, it must be later than \"from\"")
   	} else {
   	  warmup <- as.numeric(warmup - from)
+  	  args_list$warmup <- warmup
   	}
   }
 
