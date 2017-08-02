@@ -1,22 +1,46 @@
 
 #' Title
 #'
+#' not supported: sub-daily values, 360day calendar
+#  evap 12-months
 #' @param hbv_light_dir
+#' @param prec
+#' @param airt
+#' @param ep
+#' @param obs
+#' @param area
+#' @param elev_zones
 #'
 #' @return
 #' @export
 #'
 #' @examples
-parse_hbv_light <- function(hbv_light_dir) {
-  # not supported: sub-daily values, 360day calendar
-  # evap 12-months
+parse_hbv_light <- function(hbv_light_dir, prec=TRUE, airt=TRUE, ep=TRUE, obs=TRUE, area=TRUE, elev_zones=TRUE) {
+  results <- list()
+  ptq <- NULL
   ptq_file <- list.files(hbv_light_dir,full.names=TRUE,pattern="(?i)ptq\\.txt$")[1]
   evap_file <- list.files(hbv_light_dir,full.names=TRUE,pattern="(?i)evap\\.txt$")[1]
   clarea_file <- list.files(hbv_light_dir,full.names=TRUE,pattern="(?i)clarea\\.xml$")[1]
-  ptq <- read_ptq(ptq_file)
-  ep <- read_evap(evap_file,ref_ts = ptq)
-  clarea <- read_clarea(clarea_file)
-  return(list(prec=ptq[,1], airt=ptq[,2], ep=ep, obs=ptq[,3], area=clarea$area_elev, elev_zones=clarea$zones))
+  if ((prec || airt || obs) && !is.na(ptq_file)) {
+      ptq <- read_ptq(ptq_file)
+      if (prec)
+        results$prec <- ptq[,1]
+      if (airt)
+        results$airt <- ptq[,2]
+      if (obs)
+        results$obs <- ptq[,3]
+  }
+  if (ep && !is.na(evap_file)){
+    results$ep <- read_evap(evap_file,ref_ts = ptq)
+  }
+  if ((area || elev_zones) && !is.na(clarea_file)){
+    clarea <- read_clarea(clarea_file)
+    if(area)
+      results$area <- clarea$area_elev
+    if (elev_zones)
+      results$elev_zones <- clarea$zones
+  }
+  return(results)
 }
 
 
@@ -54,7 +78,6 @@ read_clarea <- function(clarea_file) {
 #' @param ptq_file
 #'
 #' @return
-#' @export
 #'
 #' @examples
 read_ptq <- function(ptq_file) {
@@ -64,12 +87,6 @@ read_ptq <- function(ptq_file) {
   # hbv-light codes missing qobs as negative values
   ptq$qobs[ptq$qobs < 0] <- NA
   return(ptq)
-  # ptq <- readr::read_delim(ptq_file,
-  #            "\t", escape_double = FALSE, col_types = readr::cols(date = readr::col_date(format = "%Y%m%d")),
-  #            comment = "#", trim_ws = TRUE, skip = 1)
-  # # return(ptq)
-  # # return(dplyr::mutate_all(ptq,dplyr::funs(replace(., .<0, NA))))
-  # return(mutate(ptq,qobs=replace(qobs,which(qobs<0),NA)))
 }
 
 
@@ -81,7 +98,6 @@ read_ptq <- function(ptq_file) {
 #' @param ref_ts
 #'
 #' @return
-#' @export
 #'
 #' @examples
 read_evap <- function(evap_file, ref_ts=NULL) {
