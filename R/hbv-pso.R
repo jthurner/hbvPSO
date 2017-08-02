@@ -1,5 +1,6 @@
-#' Title
+#' Title HBV Model with Particle Swarm Optimisation (TUWmodel + hydroPSO)
 #'
+#' Function to
 #' @param prec
 #' @param airt
 #' @param area

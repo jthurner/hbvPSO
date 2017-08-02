@@ -2,7 +2,7 @@
 % Please edit documentation in R/hbv-pso.R
 \name{hbv_pso}
 \alias{hbv_pso}
-\title{Title}
+\title{Title HBV Model with Particle Swarm Optimisation (TUWmodel + hydroPSO)}
 \usage{
 hbv_pso(prec, airt, ep, area = 1, elev_zones = NULL,
   param = ittr::tuwmodel_params_default, obs, from = NULL, to = NULL,
@@ -14,5 +14,5 @@ hbv_pso(prec, airt, ep, area = 1, elev_zones = NULL,
 \item{plotting}{}
 }
 \description{
-Title
+Function to
 }
