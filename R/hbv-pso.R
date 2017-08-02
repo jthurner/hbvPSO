@@ -1,7 +1,3 @@
-
-
-
-
 #' Title
 #'
 #' @param prec
@@ -56,7 +52,9 @@ hbv_pso <- function(prec,
   # TODO: no ts plot if obs!=zoo from plot_results (works for plot_out)
 
   args_list <- as.list(environment())
-
+  if (!is.null(outpath) && !dir.exists(outpath)) {
+      dir.create(outpath,recursive = TRUE)
+  }
   # input checking
   if(!is.null(plotting) && is.null(outpath))
     stop("If plotting is enabled, \"outpath\" must be set")
@@ -88,6 +86,8 @@ hbv_pso <- function(prec,
   # zones checking
   if (!is.null(elev_zones) &&  length(elev_zones) != length(area))
     stop("Elevation zone and area must have the same length")
+  if (sum(area) != 1)
+    stop("The sum of \"area\" must be 1")
 
   wrong_dim <- names(Filter(function(x, n_area = length(area)) {
     ncols <- NCOL(x)
@@ -227,11 +227,10 @@ hbv_pso <- function(prec,
       write.table(sim, sim_file, col.names=FALSE, row.names=FALSE)
     }
   }
-  if (plotting || is.list(plotting)) {
+  if (isTRUE(plotting) || is.list(plotting)) {
     if(do_optimize) {
       plot_args <- list(sim=zoo::coredata(sim),obs=obs,drty.out=outpath,do.png=TRUE,MinMax="max",
-                          beh.thr=0.0, ftype="dm", do.pairs=TRUE,
-                          legend.pos="right")
+                          beh.thr=0.0, ftype="dm", legend.pos="right")
       FUN_plot <- hydroPSO::plot_results
     } else {
       plot_args <- list(sim=zoo::coredata(sim), obs=obs, ptype="ts", MinMax="max", ftype="dm",
@@ -269,7 +268,6 @@ hbv_pso <- function(prec,
 #' @param FUN_gof
 #'
 #' @return
-#' @export
 #' @import TUWmodel
 #' @examples
 hbv_single <-  function(prec,
@@ -366,9 +364,6 @@ apply_tcalt <- function(series, elev_zones, telev, lapse_rate) {
 #' @param lapse_rate
 #' @param type
 #' @param neg.tozero
-#'
-#' @return
-#' @export
 #'
 #' @examples
 apply_lapse_rate <- function(series, elev_zones, elev_ref, lapse_rate,
