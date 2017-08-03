@@ -20,7 +20,7 @@ hbv_pso(prec = NULL, airt = NULL, ep = NULL, area = 1,
 
 \item{area}{If input data is distributed into zones (multivariate zoo/matrix), a vector of the decimal proportion of area for each zone.}
 
-\item{param}{Parameters as two-column matrix or dataframe (min,max) if optimisation should be performed, otherwise as vector.
+\item{param}{Parameters as two-column (min,max) matrix or dataframe if optimisation should be performed, and as vector otherwise.
 \enumerate{
 \item \code{SCF} snow correction factor (0.9-1.5);
 \item \code{DDF} degree day factor (0.0-5.0 mm/degC/timestep);
@@ -39,8 +39,8 @@ hbv_pso(prec = NULL, airt = NULL, ep = NULL, area = 1,
 \item \code{croute} free scaling parameter (0.0-50.0 timestep2/mm);
 \item \code{tcalt} Lapse rate to adjust the temperature data by elevation zone (ºC/100m, decreasing with elevation)
 \item \code{pcalt} Lapse rate to adjust the precipitation data by elevation zone (%/100m, increasing with elevation)
-} Two last to parameters are optional and used to transform the temperature/precipitation input. They are not used directly by TUWmodel. To disable pcalt/tcalt, set them to zero or ommit from param.
-See the example povided as \code{tuwmodel_params_default} for an example with the default ranges as specified in \link[TUWmodel]{TUWmodel}.}
+} The last to parameters are optional and used to transform the temperature/precipitation input. They are not used directly by TUWmodel. To disable pcalt/tcalt, set them to zero or ommit from param.
+See the example povided at \link[ittr]{tuwmodel_params_default} for an example with the default ranges as specified in \link[TUWmodel]{TUWmodel}.}
 
 \item{obs}{Observed Discharge (mm/day) as zoo or numerical}
 
