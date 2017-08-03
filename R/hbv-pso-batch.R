@@ -57,6 +57,7 @@
 #'
 #' @examples
 hbv_pso_batch <- function(basedir,...) {
+  start_time <- Sys.time()
   products <- list.dirs(basedir,recursive=FALSE, full.names=FALSE)
   all_runs <-lapply(products,hbv_pso_run,c(basedir=basedir,list(...)))
   # extract summary as dataframe and remove from results
@@ -64,6 +65,8 @@ hbv_pso_batch <- function(basedir,...) {
   all_runs = lapply(all_runs,`[`,1:2)
   # flatten result list
   results <- unlist(all_runs,recursive = FALSE)
+  run_time <- difftime(Sys.time(), start_time, units="secs")
+  message("Execution time (hours:minutes:seconds): ",format(.POSIXct(run_time, tz="UTZ"), "%H:%M:%S"))
   return(list(summary=batch_summary,results=results))
 }
 
@@ -84,12 +87,12 @@ hbv_pso_run <- function(product,basedir,...){
   #       e.g. maxit inside hydroGOF_args$control? list merges?
   # TODO: warn/stop if certain variabels exist in parent env, e.g. prec, airt etc
   # TODO: error handling if read.zoo fails/produces unexpected results?
-  source(file.path(basedir,"global_config.R"))
+  source(file.path(basedir,"global_config.R"),local=TRUE)
   # setting up paths and local config
   base_path <- file.path(basedir,product)
   localconf <- file.path(base_path,"localconf.R")
   if (file.exists(localconf)) {
-    source(localconf,chdir = TRUE)
+    source(localconf,local=TRUE,chdir = TRUE)
   }
   list2env(list(...),env=environment())
   if (is.null(suffix)) {
@@ -108,7 +111,8 @@ hbv_pso_run <- function(product,basedir,...){
 
   # read in missing data from hbv-light and unpack them into the current environment
   var_names <- c("prec","airt","ep","obs","area","elev_zones")
-  missing_vars <- var_names[sapply(var_names,function(x) is.null(get0(x)))]
+  # missing_vars <- var_names[sapply(var_names,function(x) is.null(get0(x)))]
+  missing_vars <- var_names[!sapply(var_names,exists,where=environment(),inherits=FALSE)]
   vars_from_csv <- sapply(missing_vars, function(x, base_path) {
     fp <- list.files(base_path, full.names = TRUE,
                      pattern = paste0("(?i)", x, "(\\.csv|\\.txt)?$"))[1]
@@ -119,13 +123,16 @@ hbv_pso_run <- function(product,basedir,...){
       return(NULL)
     }
   }, base_path)
-  list2env(vars_from_csv, env = environment())
-  missing_vars <- lapply(var_names,function(x) is.null(get0(x)))
+  # list2env(vars_from_csv, env = environment())
+  # missing_vars <- lapply(var_names,function(x) is.null(get0(x)))
+  list2env(Filter(Negate(is.null), vars_from_csv),env=environment())
+  missing_vars <- sapply(var_names,exists,where=environment(),inherits=FALSE)
+  missing_vars <- sapply(!missing_vars,list)
   if (dir.exists(data_path)) {
       ts_from_hbv_light <- do.call(parse_hbv_light,c(data_path,missing_vars))
       list2env(ts_from_hbv_light,envir=environment())
   }
-  missing_vars <- var_names[sapply(var_names,function(x) is.null(get0(x)))]
+  missing_vars <- var_names[!sapply(var_names,exists,where=environment(),inherits=FALSE)]
   if (length(missing_vars) > 0)
     stop("Could not find the input data for " ,id, ": ",missing_vars)
 
@@ -183,7 +190,7 @@ hbv_pso_run <- function(product,basedir,...){
   summary <- list(id = paste(product,suffix,sep="-"),
       gof_name = gof.name,
       gof = optimized$gof,
-      gov_validation = optimized_validation$gof,
+      gov_validation = ifelse(is.na(optimized_validation),NA,optimized_validation$gof),
       from = from,
       to = to,
       from_validation = from_validation,
