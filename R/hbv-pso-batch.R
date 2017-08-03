@@ -36,7 +36,7 @@
 #' The input data can be assinged in the following ways (in descending order of precedence):
 #' \enumerate{
 #' \item assignment in localconf.R. Add code which assigns the input data to the corresponding variable name, e.g. \code{prec <- read.zoo(fpath, custom_options)}
-#' \item csv files inside input data directories. The files must be named by the input time series and produce a valid zoo object with index when read in by \code{}
+#' \item text files inside input data directories. The files must be named as the input time series (with either .csv, .txt or no suffix) and produce a valid zoo object with index when read by \link[zoo]{read.zoo} with default arguments
 #' \item import from HBV-light. Dropping a "Data" directory from HBV-light inside the input data directory will allow \code{hbv_pso_batch} to automatically import the data from the format used by HBV-light.
 #' }
 #' If a given input data set is not defined in localconf, the \code{hbv_pso_batch} will try to load it from a csv file, and then (if unsuccesful) from a HBV-light "Data" directory.
@@ -83,7 +83,8 @@ hbv_pso_run <- function(product,basedir,...){
   # TODO: find a away to allow setting nested parameters through ...,
   #       e.g. maxit inside hydroGOF_args$control? list merges?
   # TODO: warn/stop if certain variabels exist in parent env, e.g. prec, airt etc
-  source(file.path(basedir,"glocal_config.R"))
+  # TODO: error handling if read.zoo fails/produces unexpected results?
+  source(file.path(basedir,"global_config.R"))
   # setting up paths and local config
   base_path <- file.path(basedir,product)
   localconf <- file.path(base_path,"localconf.R")
@@ -106,14 +107,27 @@ hbv_pso_run <- function(product,basedir,...){
                    main = id)
 
   # read in missing data from hbv-light and unpack them into the current environment
-  missing_vars <- lapply(c("prec","airt","ep","obs","area","elev_zones"),function(x) is.null(get0(x)))
+  var_names <- c("prec","airt","ep","obs","area","elev_zones")
+  missing_vars <- var_names[sapply(var_names,function(x) is.null(get0(x)))]
+  vars_from_csv <- sapply(missing_vars, function(x, base_path) {
+    fp <- list.files(base_path, full.names = TRUE,
+                     pattern = paste0("(?i)", x, "(\\.csv|\\.txt)?$"))[1]
+    if (!is.na(fp)) {
+      return(zoo::read.zoo(fp))
+    }
+    else {
+      return(NULL)
+    }
+  }, base_path)
+  list2env(vars_from_csv, env = environment())
+  missing_vars <- lapply(var_names,function(x) is.null(get0(x)))
   if (dir.exists(data_path)) {
       ts_from_hbv_light <- do.call(parse_hbv_light,c(data_path,missing_vars))
       list2env(ts_from_hbv_light,envir=environment())
   }
-  missing_vars <- sapply(c("prec","airt","ep","obs","area","elev_zones"),function(x) is.null(get0(x)))
-  if (any(missing_vars) >0)
-    stop("Could not find the following input data for " ,id, ": ",names(which(missing_vars)))
+  missing_vars <- var_names[sapply(var_names,function(x) is.null(get0(x)))]
+  if (length(missing_vars) > 0)
+    stop("Could not find the input data for " ,id, ": ",missing_vars)
 
   optimized <- hbv_pso(
     prec=prec,

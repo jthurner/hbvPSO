@@ -62,7 +62,7 @@ For each data input folder, the following variables have to be defined and conta
 The input data can be assinged in the following ways (in descending order of precedence):
 \enumerate{
 \item assignment in localconf.R. Add code which assigns the input data to the corresponding variable name, e.g. \code{prec <- read.zoo(fpath, custom_options)}
-\item csv files inside input data directories. The files must be named by the input time series and produce a valid zoo object with index when read in by \code{}
+\item text files inside input data directories. The files must be named as the input time series (with either .csv, .txt or no suffix) and produce a valid zoo object with index when read by \link[zoo]{read.zoo} with default arguments
 \item import from HBV-light. Dropping a "Data" directory from HBV-light inside the input data directory will allow \code{hbv_pso_batch} to automatically import the data from the format used by HBV-light.
 }
 If a given input data set is not defined in localconf, the \code{hbv_pso_batch} will try to load it from a csv file, and then (if unsuccesful) from a HBV-light "Data" directory.
