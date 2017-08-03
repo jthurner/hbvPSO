@@ -17,22 +17,23 @@
 #' @return A daily timeseries (zoo) interpolated from daily mean values for each month of the year
 #' @import zoo
 #' @author Joschka Thurner, \email{joschka.thurner@th-koeln.de}
+#' @keywords internal
 #' @examples
-#' m2d <- monthly2daily(as.Date("2000-01-01"),as.Date("2001-12-31"),values=c(0:6,5:1),FUN=zoo::na.approx)
-#' tail(m2d)
-#' \dontrun{
-#' # using na.approx directly for comparison
-#' m <- zooreg(rep(c(0:6,5:1),2),as.yearmon("2000-01-01"),freq = 12)
-#' sq <- seq(as.Date(start(m)), as.Date(end(m), frac = 1), by = "day")
-#' zd <- na.approx(m, x = as.Date, xout = sq)
-#'
-#' # plot both results
-#' # na.approx is missing values at the right margin, and sets the monthly value
-#' # at the first day of the month
-#' plot(m2d,col="green")
-#' lines(zd,col="red")
-#' legend('topright', c("na.approx","monthly2daily"), col = 2:3, lty = 1)
-#' }
+# \dontrun{
+# m2d <- monthly2daily(as.Date("2000-01-01"),as.Date("2001-12-31"),values=c(0:6,5:1),FUN=zoo::na.approx)
+# tail(m2d)
+# # using na.approx directly for comparison
+# m <- zooreg(rep(c(0:6,5:1),2),as.yearmon("2000-01-01"),freq = 12)
+# sq <- seq(as.Date(start(m)), as.Date(end(m), frac = 1), by = "day")
+# zd <- na.approx(m, x = as.Date, xout = sq)
+#
+# # plot both results
+# # na.approx is missing values at the right margin, and sets the monthly value
+# # at the first day of the month
+# plot(m2d,col="green")
+# lines(zd,col="red")
+# legend('topright', c("na.approx","monthly2daily"), col = 2:3, lty = 1)
+# }
 monthly2daily <-
   function(from, to, values, FUN = zoo::na.spline, ...) {
     #TODO: input checking - stop if from/to aren't dates? try to convert from string?

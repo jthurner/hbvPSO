@@ -13,3 +13,4 @@ apply_lapse_rate(series, elev_zones, elev_ref, lapse_rate, type = "rel",
 \description{
 Title
 }
+\keyword{internal}

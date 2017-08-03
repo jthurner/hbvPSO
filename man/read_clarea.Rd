@@ -21,3 +21,4 @@ Reads elevation zones and their relative area into vectors. Caution: Usage of su
 \author{
 Joschka Thurner  \email{joschka.thurner@th-koeln.de}
 }
+\keyword{internal}

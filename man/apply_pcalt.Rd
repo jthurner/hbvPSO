@@ -12,3 +12,4 @@ apply_pcalt(series, elev_zones, pelev, lapse_rate)
 \description{
 Title
 }
+\keyword{internal}

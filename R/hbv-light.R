@@ -1,5 +1,5 @@
 
-#' Title
+#' Extract settings and time series from HBV-Light's Data directory
 #'
 #' not supported: sub-daily values, 360day calendar
 #  evap 12-months
@@ -12,7 +12,7 @@
 #' @param elev_zones
 #'
 #' @return
-#' @export
+#' @keywords internal
 #'
 #' @examples
 parse_hbv_light <- function(hbv_light_dir, prec=TRUE, airt=TRUE, ep=TRUE, obs=TRUE, area=TRUE, elev_zones=TRUE) {
@@ -53,7 +53,7 @@ parse_hbv_light <- function(hbv_light_dir, prec=TRUE, airt=TRUE, ep=TRUE, obs=TR
 #' \item{zones}{Numeric vector of the elevation zones (m.a.s.l)}
 #' \item{area_elev}{Numeric vector of the eleavtion zone's relative}
 #' \item{area_vegetation}{Matrix describing the relative area of the vegetation zones (vegetation zones in columns))}
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' @author Joschka Thurner  \email{joschka.thurner@th-koeln.de}
@@ -78,7 +78,7 @@ read_clarea <- function(clarea_file) {
 #' @param ptq_file
 #'
 #' @return
-#'
+#' @keywords internal
 #' @examples
 read_ptq <- function(ptq_file) {
 
@@ -98,7 +98,7 @@ read_ptq <- function(ptq_file) {
 #' @param ref_ts
 #'
 #' @return
-#'
+#' @keywords internal
 #' @examples
 read_evap <- function(evap_file, ref_ts=NULL) {
   # TODO: handle yearly daily mean and daily values (rep/add index)

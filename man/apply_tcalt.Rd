@@ -12,3 +12,4 @@ apply_tcalt(series, elev_zones, telev, lapse_rate)
 \description{
 Title
 }
+\keyword{internal}

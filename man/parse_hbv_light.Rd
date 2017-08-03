@@ -2,7 +2,7 @@
 % Please edit documentation in R/hbv-light.R
 \name{parse_hbv_light}
 \alias{parse_hbv_light}
-\title{Title}
+\title{Extract settings and time series from HBV-Light's Data directory}
 \usage{
 parse_hbv_light(hbv_light_dir, prec = TRUE, airt = TRUE, ep = TRUE,
   obs = TRUE, area = TRUE, elev_zones = TRUE)
@@ -13,3 +13,4 @@ parse_hbv_light(hbv_light_dir, prec = TRUE, airt = TRUE, ep = TRUE,
 \description{
 not supported: sub-daily values, 360day calendar
 }
+\keyword{internal}

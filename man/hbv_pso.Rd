@@ -2,17 +2,86 @@
 % Please edit documentation in R/hbv-pso.R
 \name{hbv_pso}
 \alias{hbv_pso}
-\title{Title HBV Model with Particle Swarm Optimisation (TUWmodel + hydroPSO)}
+\title{HBV Modelling with Particle Swarm Optimisation}
 \usage{
-hbv_pso(prec, airt, ep, area = 1, elev_zones = NULL,
-  param = ittr::tuwmodel_params_default, obs, from = NULL, to = NULL,
-  warmup = 0, pelev = NULL, telev = NULL, incon = NULL,
-  outpath = NULL, hydroPSO_args = list(), FUN_gof = hydroGOF::NSE,
-  FUN_gof_args = list(), plotting = FALSE)
+hbv_pso(prec = NULL, airt = NULL, ep = NULL, area = 1,
+  param = ittr::tuwmodel_params_default, obs = NULL, from = NULL,
+  to = NULL, warmup = 0, telev = NULL, pelev = NULL,
+  elev_zones = NULL, incon = NULL, outpath = NULL,
+  hydroPSO_args = list(), FUN_gof = hydroGOF::NSE, FUN_gof_args = list(),
+  plotting = FALSE)
 }
 \arguments{
-\item{plotting}{}
+\item{prec}{Precipitation input (mm/day) as zoo, matrix or numerical. If multivariate, each variable is the input for one zone.}
+
+\item{airt}{Air Temperature input (degC/day) as zoo, matrix or numerical. If multivariate, each variable is the input for one zone.}
+
+\item{ep}{Potential Evapotranspiration (mm/day) as zoo, matrix or numerical. If multivariate, each variable is the input for one zone.}
+
+\item{area}{If input data is distributed into zones (multivariate zoo/matrix), a vector of the decimal proportion of area for each zone.}
+
+\item{param}{Parameters as two-column matrix or dataframe (min,max) if optimisation should be performed, otherwise as vector.
+\enumerate{
+\item \code{SCF} snow correction factor (0.9-1.5);
+\item \code{DDF} degree day factor (0.0-5.0 mm/degC/timestep);
+\item \code{Tr} threshold temperature above which precipitation is rain (1.0-3.0 degC);
+\item \code{Ts} threshold temperature below which precipitation is snow (-3.0-1.0 degC);
+\item \code{Tm} threshold temperature above which melt starts (-2.0-2.0 degC);
+\item \code{LPrat} parameter related to the limit for potential evaporation (0.0-1.0);
+\item \code{FC} field capacity, i.e., max soil moisture storage (0-600 mm);
+\item \code{BETA} the non linear parameter for runoff production (0.0-20.0);
+\item \code{k0} storage coefficient for very fast response (0.0-2.0 timestep);
+\item \code{k1} storage coefficient for fast response (2.0-30.0 timestep);
+\item \code{k2} storage coefficient for slow response (30.0-250.0 timestep);
+\item \code{lsuz} threshold storage state, i.e., the very fast response start if exceeded (1.0-100.0 mm);
+\item \code{cperc} constant percolation rate (0.0-8.0 mm/timestep);
+\item \code{bmax} maximum base at low flows (0.0-30.0 timestep);
+\item \code{croute} free scaling parameter (0.0-50.0 timestep2/mm);
+\item \code{tcalt} Lapse rate to adjust the temperature data by elevation zone (ºC/100m, decreasing with elevation)
+\item \code{pcalt} Lapse rate to adjust the precipitation data by elevation zone (%/100m, increasing with elevation)
+} Two last to parameters are optional and used to transform the temperature/precipitation input. They are not used directly by TUWmodel. To disable pcalt/tcalt, set them to zero or ommit from param.
+See the example povided as \code{tuwmodel_params_default} for an example with the default ranges as specified in \link[TUWmodel]{TUWmodel}.}
+
+\item{obs}{Observed Discharge (mm/day) as zoo or numerical}
+
+\item{from}{Start of the modelling period (including warmup) as Date or string in standard date format. Requires input datasets to be zoo objects.}
+
+\item{to}{End of the modelling period as Date or string in standard date format. Requires input datasets to be zoo objects.}
+
+\item{warmup}{Warmup phase which is removed before calculating goodness of fit. Can be given as numeric (days removed from the model start date) or date (as Date object or string in default format which can be cast to Date by as.Date). If given as date, it marks the end of the warmup period.}
+
+\item{telev}{Reference Elevation for the air temperature input, used to adjust temperature by tcalt.}
+
+\item{pelev}{Reference Elevation for the precipitation input, used to adjust precipitation by pcalt.}
+
+\item{elev_zones}{Vector of mean elevation for each zone. Only required if tcalt/pcalt is used.}
+
+\item{incon}{vector/matrix of initial conditions for the model (\code{ncol} = number of zones):
+\code{SSM0} soil moisture (mm);
+\code{SWE0} snow water equivalent (mm);
+\code{SUZ0} initial value for fast (upper zone) response storage (mm);
+\code{SLZ0} initial value for slow (lower zone) response storage (mm)}
+
+\item{outpath}{Path to the directory storing the output files as string. If not NULL, the following is set in in hydroPSO's control list: \code{drty.out=outpath} and \code{write2disk=TRUE}}
+
+\item{hydroPSO_args}{Arguments passed on to \link[hydroPSO]{hydroPSO}}
+
+\item{FUN_gof}{The function used to calculate goodness of fit. Must take sim and obs as first arguments.}
+
+\item{FUN_gof_args}{Further arguments passed on to \code{FUN_gof}}
+
+\item{plotting}{Toggles plotting of the results (with \link[hydroPSO]{plot_results} if optimisation is performed, otherwise with \link[hydroPSO]{plot_out}). As alternative to \code{TRUE}, a list of arguments for the respective plotting functions can be provided.}
+}
+\value{
+A list of the following items:
+\enumerate{
+\item \code{sim} simulated runoff (mm/day) of the best model run
+\item \code{obs} observed runoff (mm/day)
+\item \code{gof} goodness of fit of the best model run
+\item \code{pso_out} \link[hydroPSO]{hydroPSO} output
+\item \code{hbv_out} \link[TUWmodel]{TUWmodel} output from the best model run
+}
 }
 \description{
-Function to
+Performs particle swarm optimisation of the HBV hydrological model by wrapping \link[hydroPSO]{hydroPSO} and \link[TUWmodel]{TUWmodel}.
 }

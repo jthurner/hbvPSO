@@ -9,9 +9,7 @@ read_ptq(ptq_file)
 \arguments{
 \item{ptq_file}{}
 }
-\value{
-
-}
 \description{
 Title
 }
+\keyword{internal}

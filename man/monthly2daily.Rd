@@ -31,23 +31,7 @@ the calendar month, as produced by hydroTSM::monthlyfunction with FUN=mean).
 Monthly input data is fixed to the middle of each month for the interpolation, and values at
 the left and right margins are interpolated by extending the monthly datapoints accordingly.
 }
-\examples{
-m2d <- monthly2daily(as.Date("2000-01-01"),as.Date("2001-12-31"),values=c(0:6,5:1),FUN=zoo::na.approx)
-tail(m2d)
-\dontrun{
-# using na.approx directly for comparison
-m <- zooreg(rep(c(0:6,5:1),2),as.yearmon("2000-01-01"),freq = 12)
-sq <- seq(as.Date(start(m)), as.Date(end(m), frac = 1), by = "day")
-zd <- na.approx(m, x = as.Date, xout = sq)
-
-# plot both results
-# na.approx is missing values at the right margin, and sets the monthly value
-# at the first day of the month
-plot(m2d,col="green")
-lines(zd,col="red")
-legend('topright', c("na.approx","monthly2daily"), col = 2:3, lty = 1)
-}
-}
 \author{
 Joschka Thurner, \email{joschka.thurner@th-koeln.de}
 }
+\keyword{internal}
