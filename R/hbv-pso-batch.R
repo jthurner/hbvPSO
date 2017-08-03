@@ -134,7 +134,7 @@ hbv_pso_run <- function(product,basedir,...){
   }
   missing_vars <- var_names[!sapply(var_names,exists,where=environment(),inherits=FALSE)]
   if (length(missing_vars) > 0)
-    stop("Could not find the input data for " ,id, ": ",missing_vars)
+    stop("Could not find the input data for " ,id, ": ",paste(missing_vars))
 
   optimized <- hbv_pso(
     prec=prec,

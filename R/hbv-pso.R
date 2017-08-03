@@ -24,7 +24,7 @@
 #' \item \code{croute} free scaling parameter (0.0-50.0 timestep2/mm);
 #' \item \code{tcalt} Lapse rate to adjust the temperature data by elevation zone (ºC/100m, decreasing with elevation)
 #' \item \code{pcalt} Lapse rate to adjust the precipitation data by elevation zone (%/100m, increasing with elevation)
-#' } The last to parameters are optional and used to transform the temperature/precipitation input. They are not used directly by TUWmodel. To disable pcalt/tcalt, set them to zero or ommit from param.
+#' } The last two parameters are optional and used to transform the temperature/precipitation input. They are not used directly by TUWmodel. To disable pcalt/tcalt, set them to zero or ommit from param.
 #' See the example povided at \link[ittr]{tuwmodel_params_default} for an example with the default ranges as specified in \link[TUWmodel]{TUWmodel}.
 #' @param obs Observed Discharge (mm/day) as zoo or numerical
 #' @param from Start of the modelling period (including warmup) as Date or string in standard date format. Requires input datasets to be zoo objects.
