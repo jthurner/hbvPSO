@@ -60,8 +60,8 @@ hbv_pso_batch <- function(basedir,...) {
   start_time <- Sys.time()
   products <- list.dirs(basedir,recursive=FALSE, full.names=FALSE)
   all_runs <-lapply(products,hbv_pso_run,c(basedir=basedir,list(...)))
-  # extract summary as dataframe and remove from results
-  batch_summary <- as.data.frame(do.call(rbind,lapply(all_runs, `[[`, 3)))
+  # build summary dataframe and remove from results
+  batch_summary <- do.call(rbind,lapply(all_runs, `[[`, 3))
   all_runs = lapply(all_runs,`[`,1:2)
   # flatten result list
   results <- unlist(all_runs,recursive = FALSE)
@@ -187,14 +187,15 @@ hbv_pso_run <- function(product,basedir,...){
   else {
     optimized_validation <- NULL
   }
-  summary <- list(id = paste(product,suffix,sep="-"),
+  summary <- data.frame(id = paste(product,suffix,sep="-"),
       gof_name = gof.name,
       gof = optimized$gof,
       gov_validation = ifelse(is.null(optimized_validation),NA,optimized_validation$gof),
       from = ifelse(is.null(from),NA, from),
       to = ifelse(is.null(to),NA, to),
       from_validation = ifelse(is.null(from_validation),NA, from_validation),
-      to_validation = ifelse(is.null(to_validation),NA, to_validation)
+      to_validation = ifelse(is.null(to_validation),NA, to_validation),
+      stringsAsFactors = FALSE
   )
-  return(setNames(list(optimized,optimized_validation,summary),c(id,paste0(id,"_valid"),"summary")))
+  return(setNames(list(optimized,optimized_validation,summary),c(id,paste0(id,"_validation"),"summary")))
 }
