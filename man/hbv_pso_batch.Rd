@@ -2,7 +2,7 @@
 % Please edit documentation in R/hbv-pso-batch.R
 \name{hbv_pso_batch}
 \alias{hbv_pso_batch}
-\title{Batch-run multiple Particle Swarm Optimisations of the HBV Model}
+\title{Batch-run multiple Particle Swarm Optimizations of the HBV Model}
 \usage{
 hbv_pso_batch(basedir, ...)
 }
@@ -14,18 +14,18 @@ hbv_pso_batch(basedir, ...)
 \value{
 A list of the following items:
 \enumerate{
-\item \code{summary} data frame with id, gof, gov_valid, from, to, from_valid and to_valid for each optimisation run
-\item \code{results} list with hydro_pso output from all optimisation runs, named by id
+\item \code{summary} data frame with id, gof, gov_valid, from, to, from_valid and to_valid for each optimization run
+\item \code{results} list with hydro_pso output from all optimization runs, named by id
 }
-In addition, the output files from each optimisation run are written inside the respective data input directory, in a sub-directory named by the identifier of the optimisation run.
+In addition, the output files from each optimization run are written inside the respective data input directory, in a sub-directory named by the identifier of the optimization run.
 }
 \description{
-Batch-run multiple Particle Swarm Optimisations of the HBV Model using \link[hydroPSO]{hydroPSO} and \link[TUWmodel]{TUWmodel}.
+Batch-run multiple Particle Swarm Optimizations of the HBV Model using \link[hydroPSO]{hydroPSO} and \link[TUWmodel]{TUWmodel}.
 }
 \details{
-Runs multiple Particle Swarm Optimisations of HBV for different sets of input data (prec, airt, ep, obs, area, elevation_zones) and/or parameters.
+Runs multiple Particle Swarm Optimizations of HBV for different sets of input data (prec, airt, ep, obs, area, elevation_zones) and/or parameters.
 
-Each optimisation run is given an identification string concatenated from the name of the input data folder, the name of the gof variable and an optional suffix. This identifier is used as folder name for the output files, in plot titles and file names, and in the result list returned by \code{hbv_pso_batch}.
+Each optimization run is given an identification string concatenated from the name of the input data folder, the name of the gof variable and an optional suffix. This identifier is used as folder name for the output files, in plot titles and file names, and in the result list returned by \code{hbv_pso_batch}.
 }
 \section{Directory layout}{
 
@@ -39,19 +39,19 @@ Each optimisation run is given an identification string concatenated from the na
 
 \section{Parameter definition}{
 
-Parameters for the different optimisation runs are defined by simple variable assignment, where the variable name corresponds to the parameter as used in \link[ittr]{hbv_pso}.
+Parameters for the different optimization runs are defined by simple variable assignment, where the variable name corresponds to the parameter as used in \link[ittr]{hbv_pso}.
 They can be set in the following locations, in ascending order of precedence (parameters assigned in any location will be overwritten by re-assignment in subsequent locations):
 \enumerate{
-\item \code{global_config.R} Default parameter definition for all optimisation runs. Located at the root of the base directory
+\item \code{global_config.R} Default parameter definition for all optimization runs. Located at the root of the base directory
 \item \code{arguments to hbv_pso_batch} Argument names represent the parameter name to be set (arguments will be unpacked into the environment). Setting individual parameters nested inside lists (e.g. hydroPSOA_args$control$maxit) is currently not possible, meaning any lists passed are not merged but replace the default value.
 \item \code{localconf.R} Located inside any input data directory, parameters defined here overwrite all previous definitions and are local to the respective input data set.
 }
 
 In addition to parameters described in \link[ittr]{hbv_pso}, the following parameters unique to \code{hbv_pso_batch} can be set:
 \enumerate{
-\item \code{suffix} String, optional. Will be appended to the optimisation run identifier
-\item \code{gof.name} String. Used as part of the optimisation run identifier
-\item \code{from_validation} Date or date string in default format, start of validation run with best parameter set found during optimisation (optional)
+\item \code{suffix} String, optional. Will be appended to the optimization run identifier
+\item \code{gof.name} String. Used as part of the optimization run identifier
+\item \code{from_validation} Date or date string in default format, start of validation run with best parameter set found during optimization (optional)
 \item \code{to_validation} Date or date string in default format, end of validation period
 }
 }

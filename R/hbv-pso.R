@@ -1,11 +1,11 @@
-#' HBV Modelling with Particle Swarm Optimisation
+#' HBV Modelling with Particle Swarm Optimization
 #'
-#' Performs particle swarm optimisation of the HBV hydrological model by wrapping \link[hydroPSO]{hydroPSO} and \link[TUWmodel]{TUWmodel}.
+#' Performs particle swarm optimization of the HBV hydrological model by wrapping \link[hydroPSO]{hydroPSO} and \link[TUWmodel]{TUWmodel}.
 #' @param prec Precipitation input (mm/day) as zoo, matrix or numerical. If multivariate, each variable is the input for one zone.
 #' @param airt Air Temperature input (degC/day) as zoo, matrix or numerical. If multivariate, each variable is the input for one zone.
 #' @param ep Potential Evapotranspiration (mm/day) as zoo, matrix or numerical. If multivariate, each variable is the input for one zone.
 #' @param area If input data is distributed into zones (multivariate zoo/matrix), a vector of the decimal proportion of area for each zone.
-#' @param param Parameters as two-column (min,max) matrix or dataframe if optimisation should be performed, and as vector otherwise.
+#' @param param Parameters as two-column (min,max) matrix or dataframe if optimization should be performed, and as vector otherwise.
 #' \enumerate{
 #' \item \code{SCF} snow correction factor (0.9-1.5);
 #' \item \code{DDF} degree day factor (0.0-5.0 mm/degC/timestep);
@@ -24,7 +24,7 @@
 #' \item \code{croute} free scaling parameter (0.0-50.0 timestep2/mm);
 #' \item \code{tcalt} Lapse rate to adjust the temperature data by elevation zone (ºC/100m, decreasing with elevation)
 #' \item \code{pcalt} Lapse rate to adjust the precipitation data by elevation zone (%/100m, increasing with elevation)
-#' } The last two parameters are optional and used to transform the temperature/precipitation input. They are not used directly by TUWmodel. To disable pcalt/tcalt, set them to zero or ommit from param.
+#' } The last two parameters are optional and used to transform the temperature/precipitation input (instead of being passed on to TUWmodel). To disable pcalt/tcalt, set them to zero or ommit from param.
 #' See the example povided at \link[ittr]{tuwmodel_params_default} for an example with the default ranges as specified in \link[TUWmodel]{TUWmodel}.
 #' @param obs Observed Discharge (mm/day) as zoo or numerical
 #' @param from Start of the modelling period (including warmup) as Date or string in standard date format. Requires input datasets to be zoo objects.
@@ -42,7 +42,7 @@
 #' @param hydroPSO_args Arguments passed on to \link[hydroPSO]{hydroPSO}
 #' @param FUN_gof The function used to calculate goodness of fit. Must take sim and obs as first arguments.
 #' @param FUN_gof_args Further arguments passed on to \code{FUN_gof}
-#' @param plotting Toggles plotting of the results (with \link[hydroPSO]{plot_results} if optimisation is performed, otherwise with \link[hydroPSO]{plot_out}). As alternative to \code{TRUE}, a list of arguments for the respective plotting functions can be provided.
+#' @param plotting Toggles plotting of the results (with \link[hydroPSO]{plot_results} if optimization is performed, otherwise with \link[hydroPSO]{plot_out}). As alternative to \code{TRUE}, a list of arguments for the respective plotting functions can be provided.
 #'
 #' @return A list of the following items:
 #' \enumerate{

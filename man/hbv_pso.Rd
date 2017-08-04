@@ -2,7 +2,7 @@
 % Please edit documentation in R/hbv-pso.R
 \name{hbv_pso}
 \alias{hbv_pso}
-\title{HBV Modelling with Particle Swarm Optimisation}
+\title{HBV Modelling with Particle Swarm Optimization}
 \usage{
 hbv_pso(prec = NULL, airt = NULL, ep = NULL, area = 1,
   param = ittr::tuwmodel_params_default, obs = NULL, from = NULL,
@@ -20,7 +20,7 @@ hbv_pso(prec = NULL, airt = NULL, ep = NULL, area = 1,
 
 \item{area}{If input data is distributed into zones (multivariate zoo/matrix), a vector of the decimal proportion of area for each zone.}
 
-\item{param}{Parameters as two-column (min,max) matrix or dataframe if optimisation should be performed, and as vector otherwise.
+\item{param}{Parameters as two-column (min,max) matrix or dataframe if optimization should be performed, and as vector otherwise.
 \enumerate{
 \item \code{SCF} snow correction factor (0.9-1.5);
 \item \code{DDF} degree day factor (0.0-5.0 mm/degC/timestep);
@@ -39,7 +39,7 @@ hbv_pso(prec = NULL, airt = NULL, ep = NULL, area = 1,
 \item \code{croute} free scaling parameter (0.0-50.0 timestep2/mm);
 \item \code{tcalt} Lapse rate to adjust the temperature data by elevation zone (ºC/100m, decreasing with elevation)
 \item \code{pcalt} Lapse rate to adjust the precipitation data by elevation zone (%/100m, increasing with elevation)
-} The last to parameters are optional and used to transform the temperature/precipitation input. They are not used directly by TUWmodel. To disable pcalt/tcalt, set them to zero or ommit from param.
+} The last two parameters are optional and used to transform the temperature/precipitation input (instead of being passed on to TUWmodel). To disable pcalt/tcalt, set them to zero or ommit from param.
 See the example povided at \link[ittr]{tuwmodel_params_default} for an example with the default ranges as specified in \link[TUWmodel]{TUWmodel}.}
 
 \item{obs}{Observed Discharge (mm/day) as zoo or numerical}
@@ -70,7 +70,7 @@ See the example povided at \link[ittr]{tuwmodel_params_default} for an example w
 
 \item{FUN_gof_args}{Further arguments passed on to \code{FUN_gof}}
 
-\item{plotting}{Toggles plotting of the results (with \link[hydroPSO]{plot_results} if optimisation is performed, otherwise with \link[hydroPSO]{plot_out}). As alternative to \code{TRUE}, a list of arguments for the respective plotting functions can be provided.}
+\item{plotting}{Toggles plotting of the results (with \link[hydroPSO]{plot_results} if optimization is performed, otherwise with \link[hydroPSO]{plot_out}). As alternative to \code{TRUE}, a list of arguments for the respective plotting functions can be provided.}
 }
 \value{
 A list of the following items:
@@ -83,5 +83,5 @@ A list of the following items:
 }
 }
 \description{
-Performs particle swarm optimisation of the HBV hydrological model by wrapping \link[hydroPSO]{hydroPSO} and \link[TUWmodel]{TUWmodel}.
+Performs particle swarm optimization of the HBV hydrological model by wrapping \link[hydroPSO]{hydroPSO} and \link[TUWmodel]{TUWmodel}.
 }
