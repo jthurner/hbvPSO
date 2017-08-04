@@ -71,9 +71,9 @@ hbv_pso <- function(prec = NULL,
                     elev_zones = NULL,
                     incon = NULL,
                     outpath=NULL,
-                    hydroPSO_args = list(),
+                    hydroPSO_args = NULL,
                     FUN_gof = hydroGOF::NSE,
-                    FUN_gof_args = list(),
+                    FUN_gof_args = NULL,
                     plotting=FALSE) {
   # FIXME: what if bestrun q returns NA
   # FIXME: obs/airt/ep/prec == NULL?
@@ -83,7 +83,8 @@ hbv_pso <- function(prec = NULL,
 	# TODO: if mix of zoo/numeric for ts, somehow convert all to zoo with index of e.g. obs?
   # TODO: default control values?
   # TODO: no ts plot if obs!=zoo from plot_results (works for plot_out)
-
+  if (is.null(hydroPSO_args))
+    hydroPSO_args <- list()
   args_list <- as.list(environment())
   if (!is.null(outpath) && !dir.exists(outpath)) {
       dir.create(outpath,recursive = TRUE)
@@ -316,7 +317,7 @@ hbv_single <-  function(prec,
                        telev = NULL,
                        incon = NULL,
                        FUN_gof = hydroGOF::NSE,
-                       FUN_gof_args = list(),
+                       FUN_gof_args = NULL,
                        pcalt_applied = FALSE,
                        tcalt_applied = FALSE,
                        gof_only = TRUE) {

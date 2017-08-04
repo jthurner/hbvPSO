@@ -59,7 +59,7 @@
 hbv_pso_batch <- function(basedir,...) {
   start_time <- Sys.time()
   products <- list.dirs(basedir,recursive=FALSE, full.names=FALSE)
-  all_runs <-lapply(products,hbv_pso_run,c(basedir=basedir,list(...)))
+  all_runs <-lapply(products,hbv_pso_run,basedir=basedir,...)
   # build summary dataframe and remove from results
   batch_summary <- do.call(rbind,lapply(all_runs, `[[`, 3))
   all_runs = lapply(all_runs,`[`,1:2)
@@ -87,6 +87,7 @@ hbv_pso_run <- function(product,basedir,...){
   #       e.g. maxit inside hydroGOF_args$control? list merges?
   # TODO: warn/stop if certain variabels exist in parent env, e.g. prec, airt etc
   # TODO: error handling if read.zoo fails/produces unexpected results?
+  # list2env null handling - impossible to overwrite with NULL?
   source(file.path(basedir,"global_config.R"),local=TRUE)
   # setting up paths and local config
   base_path <- file.path(basedir,product)
@@ -159,9 +160,9 @@ hbv_pso_run <- function(product,basedir,...){
 
   if (!is.null(from_validation)) {
     output_path <- file.path(output_path,"validation")
-    sim_obs_fname <- file.path(output_path, paste0(id,"-validation",".png"))
+    sim_obs_fname <- file.path(output_path, paste0(id,"_ggof-validation",".png"))
     if(is.list(plotting))
-      plotting <- list(png.fname=sim_obs_fname, main = id)
+      plotting <- list(png.fname=sim_obs_fname, main = paste0(id,"-validation"))
 
     optimized_validation = hbv_pso(
       prec=prec,
@@ -189,8 +190,8 @@ hbv_pso_run <- function(product,basedir,...){
   }
   summary <- data.frame(id = paste(product,suffix,sep="-"),
       gof_name = gof.name,
-      gof = optimized$gof,
-      gov_validation = ifelse(is.null(optimized_validation),NA,optimized_validation$gof),
+      gof = round(optimized$gof,3),
+      gof_validation = ifelse(is.null(optimized_validation),NA,round(optimized_validation$gof,3)),
       from = ifelse(is.null(from),NA, from),
       to = ifelse(is.null(to),NA, to),
       from_validation = ifelse(is.null(from_validation),NA, from_validation),

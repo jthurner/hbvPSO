@@ -7,9 +7,8 @@
 hbv_pso(prec = NULL, airt = NULL, ep = NULL, area = 1,
   param = ittr::tuwmodel_params_default, obs = NULL, from = NULL,
   to = NULL, warmup = 0, telev = NULL, pelev = NULL,
-  elev_zones = NULL, incon = NULL, outpath = NULL,
-  hydroPSO_args = list(), FUN_gof = hydroGOF::NSE, FUN_gof_args = list(),
-  plotting = FALSE)
+  elev_zones = NULL, incon = NULL, outpath = NULL, hydroPSO_args = NULL,
+  FUN_gof = hydroGOF::NSE, FUN_gof_args = NULL, plotting = FALSE)
 }
 \arguments{
 \item{prec}{Precipitation input (mm/day) as zoo, matrix or numerical. If multivariate, each variable is the input for one zone.}
