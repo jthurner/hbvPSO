@@ -87,33 +87,43 @@ hbv_pso_run <- function(product,basedir,...){
   #       e.g. maxit inside hydroGOF_args$control? list merges?
   # TODO: warn/stop if certain variabels exist in parent env, e.g. prec, airt etc
   # TODO: error handling if read.zoo fails/produces unexpected results?
-  # list2env null handling - impossible to overwrite with NULL?
-  source(file.path(basedir,"global_config.R"),local=TRUE)
+
   # setting up paths and local config
   base_path <- file.path(basedir,product)
   localconf <- file.path(base_path,"localconf.R")
+  config_env <- new.env()
+  source(file.path(basedir,"global_config.R"),local=config_env)
+  list2env(list(...), envir = config_env)
   if (file.exists(localconf)) {
-    source(localconf,local=TRUE,chdir = TRUE)
+    source(localconf,local=config_env,chdir = TRUE)
   }
-  list2env(list(...),env=environment())
-  if (is.null(suffix)) {
-    id <- paste(product,gof.name,sep="_")
+
+  plotting <- config_env$plotting
+  suffix <- config_env$suffix
+  if (is.list(plotting)) {
+    gof.name <- plotting$gof.name
   } else {
-    id <- paste(product,gof.name,suffix,sep="_")
+    gof.name <- NULL
   }
+
+  id <- paste(c(product, gof.name, suffix), collapse = "_")
   data_path <- file.path(base_path, "Data")
   output_path <- file.path(base_path,id)
 
   # set sim-obs plot titles and file names to id
   sim_obs_fname <- paste0(id,".png")
-  if(isTRUE(plotting))
-    plotting <- list(gof.name=gof.name, modelout.best.png.fname=sim_obs_fname,
-                   main = id)
+  if(isTRUE(plotting) || is.list(plotting)) {
+    plot_args <- list(modelout.best.png.fname=sim_obs_fname, main = id)
+    if(is.list(plotting)) {
+      plotting <- c(plotting,plot_args[!(names(plot_args) %in% names(plotting))])
+    } else {
+      plotting <- plot_args
+    }
+  }
 
   # read in missing data from hbv-light and unpack them into the current environment
   var_names <- c("prec","airt","ep","obs","area","elev_zones")
-  # missing_vars <- var_names[sapply(var_names,function(x) is.null(get0(x)))]
-  missing_vars <- var_names[!sapply(var_names,exists,where=environment(),inherits=FALSE)]
+  missing_vars <- var_names[sapply(var_names, function(x) is.null(config_env[[x]]))]
   vars_from_csv <- sapply(missing_vars, function(x, base_path) {
     fp <- list.files(base_path, full.names = TRUE,
                      pattern = paste0("(?i)", x, "(\\.csv|\\.txt)?$"))[1]
@@ -124,78 +134,76 @@ hbv_pso_run <- function(product,basedir,...){
       return(NULL)
     }
   }, base_path)
-  # list2env(vars_from_csv, env = environment())
-  # missing_vars <- lapply(var_names,function(x) is.null(get0(x)))
-  list2env(Filter(Negate(is.null), vars_from_csv),env=environment())
-  missing_vars <- sapply(var_names,exists,where=environment(),inherits=FALSE)
-  missing_vars <- sapply(!missing_vars,list)
+  list2env(vars_from_csv,envir=config_env)
+  missing_vars <- sapply(var_names, function(x) is.null(config_env[[x]]))
   if (dir.exists(data_path)) {
-      ts_from_hbv_light <- do.call(parse_hbv_light,c(data_path,missing_vars))
-      list2env(ts_from_hbv_light,envir=environment())
+      ts_from_hbv_light <- do.call(parse_hbv_light,c(hbv_light_dir=data_path,as.list(missing_vars)))
+      list2env(ts_from_hbv_light,envir=config_env)
   }
-  missing_vars <- var_names[!sapply(var_names,exists,where=environment(),inherits=FALSE)]
+  missing_vars <- var_names[sapply(var_names, function(x) is.null(config_env[[x]]))]
   if (length(missing_vars) > 0)
-    stop("Could not find the input data for " ,id, ": ",paste(missing_vars))
+    stop("Could not find the following input data for " ,id, ": ",paste(missing_vars,collapse=","))
 
   optimized <- hbv_pso(
-    prec=prec,
-    airt=airt,
-    ep=ep,
-    area=area,
-    elev_zones=elev_zones,
-    param=param,
-    obs=obs,
-    from=from,
-    to=to,
-    warmup=warmup,
-    pelev = pelev,
-    telev = telev,
-    incon = incon,
+    prec = config_env$prec,
+    airt = config_env$airt,
+    ep = config_env$ep,
+    area = config_env$area,
+    elev_zones = config_env$elev_zones,
+    param = config_env$param,
+    obs = config_env$obs,
+    from = config_env$from,
+    to = config_env$to,
+    warmup = config_env$warmup,
+    pelev = config_env$pelev,
+    telev = config_env$telev,
+    incon = config_env$incon,
     outpath = output_path,
-    hydroPSO_args = hydroPSO_args,
-    FUN_gof = FUN_gof,
-    FUN_gof_args = FUN_gof_args,
+    hydroPSO_args = config_env$hydroPSO_args,
+    FUN_gof = config_env$FUN_gof,
+    FUN_gof_args = config_env$FUN_gof_args,
     plotting = plotting
+
   )
 
-  if (!is.null(from_validation)) {
+  if (!is.null(config_env$from_validation)) {
     output_path <- file.path(output_path,"validation")
-    sim_obs_fname <- file.path(output_path, paste0(id,"_ggof-validation",".png"))
     if(is.list(plotting))
+      sim_obs_fname <- file.path(output_path, paste0(id,"_ggof-validation",".png"))
       plotting <- list(png.fname=sim_obs_fname, main = paste0(id,"-validation"))
 
     optimized_validation = hbv_pso(
-      prec=prec,
-      airt=airt,
-      ep=ep,
-      area=area,
-      elev_zones=elev_zones,
-      param=optimized$pso_out$par[1:15],
-      obs=obs,
-      from=from,
-      to=to_validation,
-      warmup=from_validation,
-      pelev = pelev,
-      telev = telev,
-      incon = incon,
+      prec = config_env$prec,
+      airt = config_env$airt,
+      ep = config_env$ep,
+      area = config_env$area,
+      elev_zones = config_env$elev_zones,
+      param = optimized$pso_out$par,
+      obs = config_env$obs,
+      from = config_env$from,
+      to = config_env$to_validation,
+      warmup = config_env$from_validation,
+      pelev = config_env$pelev,
+      telev = config_env$telev,
+      incon = config_env$incon,
       outpath = output_path,
-      hydroPSO_args = list(control = control),
-      FUN_gof = FUN_gof,
-      FUN_gof_args = FUN_gof_args,
+      hydroPSO_args = config_env$hydroPSO_args,
+      FUN_gof = config_env$FUN_gof,
+      FUN_gof_args = config_env$FUN_gof_args,
       plotting = plotting
     )
-  }
-  else {
+  } else {
     optimized_validation <- NULL
   }
-  summary <- data.frame(id = paste(product,suffix,sep="-"),
-      gof_name = gof.name,
+
+  summary <- data.frame(id = paste(c(product,suffix),collapse = "-"),
+      gof_name = ifelse(is.null(gof.name),NA, from),
       gof = round(optimized$gof,3),
       gof_validation = ifelse(is.null(optimized_validation),NA,round(optimized_validation$gof,3)),
-      from = ifelse(is.null(from),NA, from),
-      to = ifelse(is.null(to),NA, to),
-      from_validation = ifelse(is.null(from_validation),NA, from_validation),
-      to_validation = ifelse(is.null(to_validation),NA, to_validation),
+      from = ifelse(is.null(config_env$from),NA, config_env$from),
+      to = ifelse(is.null(config_env$to),NA, config_env$to),
+      from_validation = ifelse(is.null(config_env$from_validation),NA, config_env$from_validation),
+      to_validation = ifelse(is.null(config_env$to_validation),NA, config_env$to_validation),
       stringsAsFactors = FALSE
   )
   return(setNames(list(optimized,optimized_validation,summary),c(id,paste0(id,"_validation"),"summary")))
