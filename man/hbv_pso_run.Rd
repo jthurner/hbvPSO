@@ -2,14 +2,106 @@
 % Please edit documentation in R/hbv-pso-batch.R
 \name{hbv_pso_run}
 \alias{hbv_pso_run}
-\title{Title}
+\title{(Batch-) Run Particle Swarm Optimizations of the HBV Model}
 \usage{
-hbv_pso_run(product, basedir, ...)
+hbv_pso_run(configpath, recursive = FALSE, suffix = NULL, gof.name = NULL,
+  from_validation = NULL, to_validation = NULL, ...)
 }
 \arguments{
-\item{...}{}
+\item{configpath}{character vector of full path and/or file names. Any file
+given is sourced and an \code{hbv_pso} optimization run is started with the
+imported arguments. Any directory given is searched for R files starting
+with "run", and an optimization run is started for each found in the same
+way as for file paths.}
+
+\item{recursive}{logical, should config files be searched in subdirectories?
+If true, \code{hbv_pso_run} will recurse once into any directory given in
+\code{configpath} before searching for configuration files}
+
+\item{suffix}{String, will be appended to the optimization run identifier}
+
+\item{gof.name}{String, Used as part of the optimization run identifier.
+Shorthand for setting plotting$gof.name. If gof.name is not set directly,
+the value from plotting$gof.name is used.}
+
+\item{from_validation}{Date or date string in default format, start of
+validation run with best parameter set found during optimization}
+
+\item{to_validation}{Date or date string in default format, end of validation
+period}
+
+\item{...}{Parameters passed to hbv_pso, will overwrite those set in in the
+configuration files.}
+}
+\value{
+A list of the following items:
+\enumerate{
+\item \code{summary} data
+frame with id, gof, gof_valid, from, to, from_valid and to_valid for each
+optimization run
+\item \code{results} list with hydro_pso output from all
+optimization runs, named by id
+}
+
+In addition, the output files from each optimization run are written inside a
+directory which is located in the same directory as the configuration file,
+and named by the identifier of the respective optimization run.
 }
 \description{
-Title
+Run Particle Swarm Optimizations of the HBV Model using \code{\link{hydroPSO}}
+and \code{\link{TUWmodel}} by importing configurations from R files. Supports
+specifiying multiple configuration files to run optimizations in batches.
 }
-\keyword{internal}
+\details{
+Runs Particle Swarm Optimizations of HBV for given parameter sets
+defined in simple R scripts. Timeseries input data (prec, airt, ep, obs,
+area, elevation_zones) can be automatically imported from csv or HBV-light
+format.
+
+Each optimization run is given an identification string concatenated from
+the name of the input data directory (i.e. the location of the
+configuration file), the name of the gof variable and an optional suffix.
+This identifier is used as directory name for the output files, in plot
+titles and file names, and in the result list returned by \code{hbv_pso_run}.
+}
+\section{Parameter definition}{
+ Parameters for the different optimization runs
+are defined by simple variable assignment, where the variable name
+corresponds to the parameter as used in \code{\link[=hbv_pso]{hbv_pso()}}. They are defined in
+simple R files passed to \code{hbv_pso_run} (see \code{configpath}). In order for the
+configuration files to be recognized when passing directory paths to
+\code{hbv_pso_run}, the configuration file names must start with "run".
+
+Parameters can also be set by passing them as additional arguments to
+\code{hbv_pso_run}, which will overwrite parameters set in configuration
+file(s). Be aware that when using this option, any lists passed are not
+merged but completely replace the values set in the configfile.
+
+In addition to parameters described in \code{\link[=hbv_pso]{hbv_pso()}}, the following optional
+parameters unique to \code{hbv_pso_run} can also be set in configuration files:
+\code{suffix}, \code{gof.name},\code{from_validation}, \code{to_validation} (see above).
+}
+
+\section{Input data definition}{
+ For each optimization run, the following
+variables have to be defined and contain valid values as defined in
+\code{\link[=hbv_pso]{hbv_pso()}}: prec, airt, ep, obs, area, elev_zones. The input data
+can be assinged in the following ways (in descending order of precedence):
+\enumerate{
+\item \emph{assignment inside the configfile}: Add code which assigns the input
+\item \emph{text files inside input data directories}:
+The files must be named as the input time series (with either
+.csv, .txt or no suffix, e.g. \code{prec.csv}) and be located in the same
+directory as the configfile. They must produce a valid zoo object with
+index when read by \link{read.zoo} with default arguments
+\item \emph{import from HBV-light}:
+Dropping a "Data" directory from HBV-light inside the input
+data directory will allow \code{hbv_pso_run} to automatically import the
+data from the format used by HBV-light.
+}
+
+If a given input data set is not defined in the configuration file,
+\code{hbv_pso_run} will try to load it from a csv file, and then (if unsuccesful)
+from a HBV-light "Data" directory.
+}
+

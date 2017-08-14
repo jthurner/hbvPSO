@@ -1,65 +1,109 @@
 
-#' Batch-run multiple Particle Swarm Optimizations of the HBV Model
+#' (Batch-) Run Particle Swarm Optimizations of the HBV Model
 #'
-#' Batch-run multiple Particle Swarm Optimizations of the HBV Model using \link[hydroPSO]{hydroPSO} and \link[TUWmodel]{TUWmodel}.
-#' @details
-#' Runs multiple Particle Swarm Optimizations of HBV for different sets of input data (prec, airt, ep, obs, area, elevation_zones) and/or parameters.
+#' Run Particle Swarm Optimizations of the HBV Model using [`hydroPSO`]
+#' and [`TUWmodel`] by importing configurations from R files. Supports
+#' specifiying multiple configuration files to run optimizations in batches.
 #'
-#' Each optimization run is given an identification string concatenated from the name of the input data folder, the name of the gof variable and an optional suffix. This identifier is used as folder name for the output files, in plot titles and file names, and in the result list returned by \code{hbv_pso_batch}.
+#' @details Runs Particle Swarm Optimizations of HBV for given parameter sets
+#'   defined in simple R scripts. Timeseries input data (prec, airt, ep, obs,
+#'   area, elevation_zones) can be automatically imported from csv or HBV-light
+#'   format.
 #'
-#' @section Directory layout:
-#' \code{hbv_pso_batch} assumes you have set up your input data in the following way:
-#' \itemize{
-#' \item \code{base directory} A root directory containing the global parameter config and sub-directories for different sets of input data. The path to this directory is the first argument passed to \code{hbv_pso_batch}
-#' \item \code{input data directories} Sub-directories to \code{base directory} containing sets of input data (prec,airt,ep,obs,area and elevation_zones).
-#' \item \code{Data directory} Optional, sub-directory to \code{input data directories} containing a \code{Data} directory taken from HBV-Light (see "Input data definition" below).
-#' }
+#'   Each optimization run is given an identification string concatenated from
+#'   the name of the input data directory (i.e. the location of the
+#'   configuration file), the name of the gof variable and an optional suffix.
+#'   This identifier is used as directory name for the output files, in plot
+#'   titles and file names, and in the result list returned by `hbv_pso_run`.
 #'
-#' @section Parameter definition:
-#' Parameters for the different optimization runs are defined by simple variable assignment, where the variable name corresponds to the parameter as used in \link[ittr]{hbv_pso}.
-#' They can be set in the following locations, in ascending order of precedence (parameters assigned in any location will be overwritten by re-assignment in subsequent locations):
-#' \enumerate{
-#' \item \code{global_config.R} Default parameter definition for all optimization runs. Located at the root of the base directory
-#' \item \code{arguments to hbv_pso_batch} Argument names represent the parameter name to be set (arguments will be unpacked into the environment). Setting individual parameters nested inside lists (e.g. hydroPSOA_args$control$maxit) is currently not possible, meaning any lists passed are not merged but replace the default value.
-#' \item \code{localconf.R} Located inside any input data directory, parameters defined here overwrite all previous definitions and are local to the respective input data set.
-#' }
 #'
-#' In addition to parameters described in \link[ittr]{hbv_pso}, the following parameters unique to \code{hbv_pso_batch} can be set:
-#' \enumerate{
-#' \item \code{suffix} String, optional. Will be appended to the optimization run identifier
-#' \item \code{gof.name} String. Used as part of the optimization run identifier
-#' \item \code{from_validation} Date or date string in default format, start of validation run with best parameter set found during optimization (optional)
-#' \item \code{to_validation} Date or date string in default format, end of validation period
-#' }
-#' @section Input data definition:
-#' For each data input folder, the following variables have to be defined and contain valid values as defined in \link[ittr]{hbv_pso}: prec, airt, ep, obs, area, elev_zones.
-#' The input data can be assinged in the following ways (in descending order of precedence):
-#' \enumerate{
-#' \item assignment in localconf.R. Add code which assigns the input data to the corresponding variable name, e.g. \code{prec <- read.zoo(fpath, custom_options)}
-#' \item text files inside input data directories. The files must be named as the input time series (with either .csv, .txt or no suffix) and produce a valid zoo object with index when read by \link[zoo]{read.zoo} with default arguments
-#' \item import from HBV-light. Dropping a "Data" directory from HBV-light inside the input data directory will allow \code{hbv_pso_batch} to automatically import the data from the format used by HBV-light.
-#' }
-#' If a given input data set is not defined in localconf, the \code{hbv_pso_batch} will try to load it from a csv file, and then (if unsuccesful) from a HBV-light "Data" directory.
+#' @section Parameter definition: Parameters for the different optimization runs
+#'   are defined by simple variable assignment, where the variable name
+#'   corresponds to the parameter as used in [hbv_pso()]. They are defined in
+#'   simple R files passed to `hbv_pso_run` (see `configpath`). In order for the
+#'   configuration files to be picked up when passing directory paths to
+#'   `hbv_pso_run`, the configuration file names must start with "run".
 #'
-#' @param basedir String, file path to the base directory containing glocal_config.R and directories with input data
-#' @param ... Parameters set here will overwrite those set in glocal_config (but overwritten if also set in localconf)
+#'   Parameters can also be set by passing them as additional arguments to
+#'   `hbv_pso_run`, which will overwrite corresponding values defined in
+#'   configuration file(s).
+#'   Be aware that when using this option, any lists passed are not merged but
+#'   completely replace the values set in the configfile.
+#'
+#'   In addition to parameters described in [hbv_pso()], the following optional
+#'   parameters unique to `hbv_pso_run` can also be set in configuration files:
+#'   `suffix`, `gof.name`,`from_validation`, `to_validation` (see above).
+#'
+#' @section Input data definition: For each optimization run, the following
+#'   variables have to be defined and contain valid values as defined in
+#'   [hbv_pso()]: prec, airt, ep, obs, area, elev_zones. The input data
+#'   can be assinged in the following ways (in descending order of precedence):
+#'
+#'   1. *assignment inside the configfile*: Add code which assigns the input
+#`      data to the corresponding variable name, e.g. `prec <-
+#`      read.zoo(fpath, custom_options)
+#'   2. *text files inside input data directories*:
+#'       The files must be named as the input time series (with either
+#'       .csv, .txt or no suffix, e.g. `prec.csv`) and be located in the same
+#'       directory as the configfile. They must produce a valid zoo object with
+#'       index when read by [read.zoo] with default arguments
+#'   3. *import from HBV-light*:
+#'       Dropping a "Data" directory from HBV-light inside the input
+#'       data directory will allow `hbv_pso_run` to automatically import the
+#'       data from the format used by HBV-light.
+#'
+#' If a given input data set is not defined in the configuration file,
+#' `hbv_pso_run` will try to load it from a csv file, and then (if unsuccesful)
+#' from a HBV-light "Data" directory.
+#'
+#' @param configpath character vector of full path and/or file names. Any file
+#'   given is sourced and an `hbv_pso` optimization run is started with the
+#'   imported arguments. Any directory given is searched for R files starting
+#'   with "run", and an optimization run is started for each found in the same
+#'   way as for file paths.
+#' @param recursive logical, should config files be searched in subdirectories?
+#'   If true, `hbv_pso_run` will recurse once into any directory given in
+#'   `configpath` before searching for configuration files
+
+#' @param suffix String, will be appended to the optimization run identifier
+#' @param gof.name String, Used as part of the optimization run identifier.
+#' Shorthand for setting plotting$gof.name. If gof.name is not set directly,
+#' the value from plotting$gof.name is used.
+#' @param from_validation Date or date string in default format, start of
+#' validation run with best parameter set found during optimization
+#' @param to_validation Date or date string in default format, end of validation
+#' period
+#' @param ... Parameters passed to hbv_pso, will overwrite those set in in the
+#'   configuration files.
 #'
 #' @return A list of the following items:
-#' \enumerate{
-#' \item \code{summary} data frame with id, gof, gov_valid, from, to, from_valid and to_valid for each optimization run
-#' \item \code{results} list with hydro_pso output from all optimization runs, named by id
-#' }
-#' In addition, the output files from each optimization run are written inside the respective data input directory, in a sub-directory named by the identifier of the optimization run.
 #'
+#' 1. `summary` data
+#'   frame with id, gof, gof_valid, from, to, from_valid and to_valid for each
+#'   optimization run
+#' 2. `results` list with hydro_pso output from all
+#'   optimization runs, named by id
 #'
+#' In addition, the output files from each optimization run are written inside a
+#' directory which is located in the same directory as the configuration file,
+#' and named by the identifier of the respective optimization run.
 #'
+#' @md
 #' @export
 #'
 #' @examples
-hbv_pso_batch <- function(basedir,...) {
+hbv_pso_run <-
+  function(configpath, recursive = FALSE, suffix = NULL, gof.name = NULL,
+           from_validation = NULL, to_validation = NULL, ...) {
   start_time <- Sys.time()
-  products <- list.dirs(basedir,recursive=FALSE, full.names=FALSE)
-  all_runs <-lapply(products,hbv_pso_run,basedir=basedir,...)
+  isdir <- sapply(configpath,function(x) file.info(x)$isdir)
+  dirs <- configpath[isdir]
+  if (recursive && length(dirs)>0) {
+    dirs <- list.dirs(dirs,recursive=FALSE, full.names=TRUE)
+  }
+  configs <- list.files(dirs, full.names = TRUE,
+                        pattern = "(?i)^run.*\\.R$")
+  all_runs <-lapply(c(configs,configpath[!isdir]),hbv_pso_run,...)
   # build summary dataframe and remove from results
   batch_summary <- do.call(rbind,lapply(all_runs, `[[`, 3))
   all_runs = lapply(all_runs,`[`,1:2)
@@ -72,47 +116,50 @@ hbv_pso_batch <- function(basedir,...) {
 
 #' Title
 #'
-#' @param product
-#' @param basedir
+#' @param configfile
 #' @param ...
 #'
 #' @return
 #' @keywords internal
 #'
 #' @examples
-hbv_pso_run <- function(product,basedir,...){
+hbv_pso_run_single <- function(configfile,...){
   # TODO: read input data from .csv files in basedir
-  # TODO: rename "prodcut" to something more generic
   # TODO: find a away to allow setting nested parameters through ...,
   #       e.g. maxit inside hydroGOF_args$control? list merges?
-  # TODO: warn/stop if certain variabels exist in parent env, e.g. prec, airt etc
   # TODO: error handling if read.zoo fails/produces unexpected results?
 
-  # setting up paths and local config
-  base_path <- file.path(basedir,product)
-  localconf <- file.path(base_path,"localconf.R")
+  base_path <- dirname(configfile)
   config_env <- new.env()
-  source(file.path(basedir,"global_config.R"),local=config_env)
+  source(configfile, local = config_env, chdir = TRUE)
   list2env(list(...), envir = config_env)
-  if (file.exists(localconf)) {
-    source(localconf,local=config_env,chdir = TRUE)
-  }
 
+  # easier handling of plotting arg: list if we should plot, FALSE otherwise
   plotting <- config_env$plotting
-  suffix <- config_env$suffix
+  if (is.null(plotting)) {
+    plotting <- FALSE
+  } else if (isTRUE(plotting)) {
+    plotting <- list()
+  }
+  # if defined, gof.name sets plotting$gof.name. if not, get it from plotting
+  gof.name <- config_env$gof.name
   if (is.list(plotting)) {
-    gof.name <- plotting$gof.name
-  } else {
-    gof.name <- NULL
+    if (is.null(gof.name)) {
+      gof.name <- plotting$gof.name
+    } else {
+      plotting$gof.name <- gof.name
+    }
   }
 
-  id <- paste(c(product, gof.name, suffix), collapse = "_")
+  suffix <- config_env$suffix
+
+  id <- paste(c(basename(base_path), gof.name, suffix), collapse = "_")
   data_path <- file.path(base_path, "Data")
   output_path <- file.path(base_path,id)
 
   # set sim-obs plot titles and file names to id
   sim_obs_fname <- paste0(id,".png")
-  if(isTRUE(plotting) || is.list(plotting)) {
+  if(is.list(plotting)) {
     plot_args <- list(modelout.best.png.fname=sim_obs_fname, main = id)
     if(is.list(plotting)) {
       plotting <- c(plotting,plot_args[!(names(plot_args) %in% names(plotting))])
@@ -121,7 +168,7 @@ hbv_pso_run <- function(product,basedir,...){
     }
   }
 
-  # read in missing data from hbv-light and unpack them into the current environment
+  # read in missing data from hbv-light and unpack them into the config environment
   var_names <- c("prec","airt","ep","obs","area","elev_zones")
   missing_vars <- var_names[sapply(var_names, function(x) is.null(config_env[[x]]))]
   vars_from_csv <- sapply(missing_vars, function(x, base_path) {
@@ -196,8 +243,8 @@ hbv_pso_run <- function(product,basedir,...){
     optimized_validation <- NULL
   }
 
-  summary <- data.frame(id = paste(c(product,suffix),collapse = "-"),
-      gof_name = ifelse(is.null(gof.name),NA, from),
+  summary <- data.frame(id = paste(c(basename(base_path),suffix),collapse = "-"),
+      gof_name = ifelse(is.null(gof.name),NA, gof.name),
       gof = round(optimized$gof,3),
       gof_validation = ifelse(is.null(optimized_validation),NA,round(optimized_validation$gof,3)),
       from = ifelse(is.null(config_env$from),NA, config_env$from),

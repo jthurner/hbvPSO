@@ -3,7 +3,7 @@
 export(apply_pcalt)
 export(apply_tcalt)
 export(hbv_pso)
-export(hbv_pso_batch)
+export(hbv_pso_run)
 import(TUWmodel)
 import(xml2)
 import(zoo)
