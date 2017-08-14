@@ -85,12 +85,15 @@ hbv_pso <- function(prec = NULL,
   # TODO: no ts plot if obs!=zoo from plot_results (works for plot_out)
   if (is.null(hydroPSO_args))
     hydroPSO_args <- list()
+  # simplify argument handling: plotting is a list if we should plot, FALSE otherwise
+  if (isTRUE(plotting))
+    plotting = list()
   args_list <- as.list(environment())
   if (!is.null(outpath) && !dir.exists(outpath)) {
       dir.create(outpath,recursive = TRUE)
   }
   # input checking
-  if(!is.null(plotting) && is.null(outpath))
+  if(is.list(plotting) && is.null(outpath))
     stop("If plotting is enabled, \"outpath\" must be set")
 
   if (NCOL(obs) != 1) {
@@ -261,7 +264,7 @@ hbv_pso <- function(prec = NULL,
       write.table(sim, sim_file, col.names=FALSE, row.names=FALSE)
     }
   }
-  if (isTRUE(plotting) || is.list(plotting)) {
+  if (is.list(plotting)) {
     if(do_optimize) {
       plot_args <- list(sim=zoo::coredata(sim),obs=obs,drty.out=outpath,do.png=TRUE,MinMax="max",
                           beh.thr=0.0, ftype="dm", legend.pos="right")
@@ -271,9 +274,7 @@ hbv_pso <- function(prec = NULL,
                             do.png=TRUE, png.fname=file.path(outpath,"ModelOut_vs_Obs.png"))
       FUN_plot <- hydroPSO::plot_out
     }
-    if (is.list(plotting)) {
-      plot_args <- c(plotting,plot_args[!(names(plot_args) %in% names(plotting))])
-    }
+    plot_args <- c(plotting,plot_args[!(names(plot_args) %in% names(plotting))])
     do.call(FUN_plot,plot_args)
   }
   return(list(sim = sim, obs = obs, gof = bestrun$gof, pso_out = bestpar,
