@@ -2,13 +2,15 @@ Package: hbvPSO
 Type: Package
 Title: Particle Swarm Optimization for the HBV Hydrological Model
 Version: 0.0.0
-Author: Joschka Thurner <joschka.thurner@th-koeln.de>
+Authors@R: as.person("Joschka Thurner <joschka.thurner@th-koeln.de> [aut,cre]")
 Maintainer: Joschka Thurner <joschka.thurner@th-koeln.de>
 Description: Applies particle swarm optimization (utilizing the hydroPSO
     packahge) to the HBV rainfall-runoff model (utilizing the TUWmodel package).
     Input parameters can optionally be supplied as configuration files written
     in R, and multiple optimization runs can  be executed in batches. Contains
     some helper functions to import data and settings from HBV-light.
+URL: https://github.com/jthurner/hbvPSO
+BugReports: https://github.com/jthurner/hbvPSO/issues
 License: GPL
 Encoding: UTF-8
 LazyData: true

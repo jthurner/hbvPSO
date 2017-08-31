@@ -3,7 +3,7 @@
 hbvPSO (R package)
 ==================
 
-hbvPSO provides an easy way to apply particle swarm optimization to the HBV rainfall-runoff model. It uses the [`hydroPSO`](https://cran.r-project.org/web/packages/hydroPSO/index.html) package for the optimization and the package [`TUWmodel`](https://cran.r-project.org/web/packages/TUWmodel/index.html) for the model itself. Input parameters can optionally be supplied as configuration files written in R, and multiple optimization runs can be executed in batches. Contains some helper functions to import data and settings from HBV-light.
+hbvPSO provides an easy way to apply particle swarm optimization to the HBV rainfall-runoff model. It uses the [hydroPSO](https://cran.r-project.org/web/packages/hydroPSO/index.html) package for the optimization and the package [TUWmodel](https://cran.r-project.org/web/packages/TUWmodel/index.html) for the model itself. Input parameters can optionally be supplied as configuration files written in R, and multiple optimization runs can be executed in batches. Contains some helper functions to import data and settings from HBV-light.
 
 Installation
 ------------
@@ -14,6 +14,11 @@ You can install hbvPSO from github with:
 # install.packages("devtools")
 devtools::install_github("jthurner/hbvPSO")
 ```
+
+Documentation
+-------------
+
+An online version of the function documentation is available [here](https://jthurner.github.io/hbvPSO//index.html) (under "Reference").
 
 Status
 ------
