@@ -2,7 +2,7 @@ Package: hbvPSO
 Type: Package
 Title: Particle Swarm Optimization for the HBV Hydrological Model
 Version: 0.0.0
-Authors@R: as.person("Joschka Thurner <joschka.thurner@th-koeln.de> [aut,cre]")
+Authors@R: person("Joschka", "Thurner",email="joschka.thurner@th-koeln.de>",role=c("aut","cre"),comment="Institute for Technology and Resources Management in the Tropics and Subtropics, TH Cologne")
 Maintainer: Joschka Thurner <joschka.thurner@th-koeln.de>
 Description: Applies particle swarm optimization (utilizing the hydroPSO
     packahge) to the HBV rainfall-runoff model (utilizing the TUWmodel package).
