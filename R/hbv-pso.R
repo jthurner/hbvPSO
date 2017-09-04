@@ -83,11 +83,41 @@ hbv_pso <- function(prec = NULL,
 	# TODO: if mix of zoo/numeric for ts, somehow convert all to zoo with index of e.g. obs?
   # TODO: default control values?
   # TODO: no ts plot if obs!=zoo from plot_results (works for plot_out)
-  if (is.null(hydroPSO_args))
-    hydroPSO_args <- list()
-  # simplify argument handling: plotting is a list if we should plot, FALSE otherwise
+
+  # simplify argument handling: set up hydroPSO_args structure
+  if (is.null(hydroPSO_args)) {
+    hydroPSO_args <- list(control=list())
+  } else if (is.null(hydroPSO_args$control)) {
+    hydroPSO_args$control <- list()
+  }
+  if (is.null(outpath)) {
+    hydroPSO_args$control$write2disk <- FALSE
+  } else {
+    hydroPSO_args$control$write2disk <- TRUE
+    hydroPSO_args$control$drty.out <- outpath
+  }
+  # set up hydroPSO defaults
+  hydroPSO_args$control$MinMax <- "max"
+
+  # re-set defaults for FUN_gof and param if they were set to NULL
+  if (is.null(FUN_gof)) {
+    FUN_gof <- hydroGOF::NSE
+    FUN_gof_args <- NULL
+  }
+  if (is.null(param)) {
+    param = hbvPSO::tuwmodel_params_default
+  }
+
+  # force plotting to be a list if we should plot, FALSE otherwise
   if (isTRUE(plotting))
     plotting = list()
+
+  # if gof.name is not defined, set it to the name of the objective function
+  if (is.list(plotting) && is.null(plotting$gof.name)) {
+    plotting$gof.name <- gsub("^.*:","", deparse(substitute(FUN_gof)))
+  }
+
+  # capture arguments into list for processing & handing off to hydroPSO
   args_list <- as.list(environment())
   if (!is.null(outpath) && !dir.exists(outpath)) {
       dir.create(outpath,recursive = TRUE)
@@ -146,7 +176,7 @@ hbv_pso <- function(prec = NULL,
   if(!is.null(to)) {
     to <- tryCatch(as.Date(to), error = function(err) {NULL})
     if (is.null(to))
-      stop("\to\" could not be cast to a date (using as.Date defaults)")
+      stop("\"to\" could not be cast to a date (using as.Date defaults)")
   }
   ts_as_zoo <- all(sapply(args_list[ts_names], zoo::is.zoo))
 
@@ -227,12 +257,6 @@ hbv_pso <- function(prec = NULL,
   do_optimize <- ifelse(ncol(param)==2,TRUE,FALSE)
   # Run hydroPSO if we have a parameter range
   if (do_optimize) {
-    if (!is.null(outpath)) {
-      if (!"control" %in% names(hydroPSO_args))
-        hydroPSO_args$control <- list()
-      hydroPSO_args$control$write2disk <- TRUE
-      hydroPSO_args$control$drty.out <- outpath
-    }
     hydroPSO_args_default <- list(lower=param[, 1], upper = param[, 2], fn="hbv_single")
     hydroPSO_args <- c(hydroPSO_args,hydroPSO_args_default[!(names(hydroPSO_args_default) %in% names(hydroPSO_args))])
 
@@ -249,17 +273,21 @@ hbv_pso <- function(prec = NULL,
   args_list$gof_only <- FALSE
   bestrun <- do.call(hbv_single, args_list)
 
+  if (zoo::is.zoo(obs)) {
+    sim <- zoo::zoo(bestrun$hbv_out$q, order.by=zoo::index(obs))
+  } else {
+    sim <- bestrun$hbv_out$q
+  }
+
   if (!is.null(outpath)) {
     # TODO: rename modelout / keep bestmodelout for single run?
     sim_file_name <- ifelse(do_optimize, "BestModel_out.txt","Model_out.txt")
     sim_file <- file.path(outpath, sim_file_name)
     obs_file <- file.path(outpath, "Observations.txt")
     if (zoo::is.zoo(obs)) {
-    	sim <- zoo::zoo(bestrun$hbv_out$q, order.by=zoo::index(obs))
       write.zoo(obs, obs_file, col.names=FALSE)
       write.zoo(sim, sim_file, col.names=FALSE)
     } else {
-    	sim <- bestrun$hbv_out$q
       write.table(obs, obs_file, col.names=FALSE, quote=FALSE)
       write.table(sim, sim_file, col.names=FALSE, row.names=FALSE)
     }
