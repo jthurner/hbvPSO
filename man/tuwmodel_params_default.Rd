@@ -29,6 +29,6 @@ tuwmodel_params_default
 }
 \description{
 Input parameter ranges as given in the \link[TUWmodel]{TUWmodel} documentation for \code{param}.
-Additionally includes \code{tcalt} and \code{pcalt} as used in \link[ittr]{hbv_pso}, set to 0 (no pcalt/tcalt applied).
+Additionally includes \code{tcalt} and \code{pcalt} as used in \link[hbvPSO]{hbv_pso}, set to 0 (no pcalt/tcalt applied).
 }
 \keyword{datasets}

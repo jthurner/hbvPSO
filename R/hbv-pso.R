@@ -25,7 +25,7 @@
 #' \item \code{tcalt} Lapse rate to adjust the temperature data by elevation zone (ºC/100m, decreasing with elevation)
 #' \item \code{pcalt} Lapse rate to adjust the precipitation data by elevation zone (%/100m, increasing with elevation)
 #' } The last two parameters are optional and used to transform the temperature/precipitation input (instead of being passed on to TUWmodel). To disable pcalt/tcalt, set them to zero or ommit from param.
-#' See the example povided at \link[ittr]{tuwmodel_params_default} for an example with the default ranges as specified in \link[TUWmodel]{TUWmodel}.
+#' See the example povided at \link[hbvPSO]{tuwmodel_params_default} for an example with the default ranges as specified in \link[TUWmodel]{TUWmodel}.
 #' @param obs Observed Discharge (mm/day) as zoo or numerical
 #' @param from Start of the modelling period (including warmup) as Date or string in standard date format. Requires input datasets to be zoo objects.
 #' @param to End of the modelling period as Date or string in standard date format. Requires input datasets to be zoo objects.
@@ -61,7 +61,7 @@ hbv_pso <- function(prec = NULL,
                     airt = NULL,
                     ep = NULL,
                     area = 1,
-                    param = ittr::tuwmodel_params_default,
+                    param = hbvPSO::tuwmodel_params_default,
                     obs = NULL,
                     from = NULL,
                     to = NULL,

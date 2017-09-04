@@ -5,7 +5,7 @@
 \title{HBV Modelling with Particle Swarm Optimization}
 \usage{
 hbv_pso(prec = NULL, airt = NULL, ep = NULL, area = 1,
-  param = ittr::tuwmodel_params_default, obs = NULL, from = NULL,
+  param = hbvPSO::tuwmodel_params_default, obs = NULL, from = NULL,
   to = NULL, warmup = 0, telev = NULL, pelev = NULL,
   elev_zones = NULL, incon = NULL, outpath = NULL, hydroPSO_args = NULL,
   FUN_gof = hydroGOF::NSE, FUN_gof_args = NULL, plotting = FALSE)
@@ -39,7 +39,7 @@ hbv_pso(prec = NULL, airt = NULL, ep = NULL, area = 1,
 \item \code{tcalt} Lapse rate to adjust the temperature data by elevation zone (ºC/100m, decreasing with elevation)
 \item \code{pcalt} Lapse rate to adjust the precipitation data by elevation zone (%/100m, increasing with elevation)
 } The last two parameters are optional and used to transform the temperature/precipitation input (instead of being passed on to TUWmodel). To disable pcalt/tcalt, set them to zero or ommit from param.
-See the example povided at \link[ittr]{tuwmodel_params_default} for an example with the default ranges as specified in \link[TUWmodel]{TUWmodel}.}
+See the example povided at \link[hbvPSO]{tuwmodel_params_default} for an example with the default ranges as specified in \link[TUWmodel]{TUWmodel}.}
 
 \item{obs}{Observed Discharge (mm/day) as zoo or numerical}
 

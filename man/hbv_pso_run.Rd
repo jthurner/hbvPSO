@@ -95,14 +95,14 @@ The files must be named as the input time series (with either
 .csv, .txt or no suffix, e.g. \code{prec.csv}) and be located in the same
 directory as the configfile. They must produce a valid zoo object with
 index when read by \link{read.zoo} with default arguments
-\item \emph{import from HBV-light}:
-Dropping a "Data" directory from HBV-light inside the input
-data directory will allow \code{hbv_pso_run} to automatically import the
-data from the format used by HBV-light.
+\item \emph{HBV-light input files}:
+Analogue to the text files above, input data can also be imported from
+files as used by HBV-light ("ptq.text" and "ep.txt")
 }
 
 If a given input data set is not defined in the configuration file,
-\code{hbv_pso_run} will try to load it from a csv file, and then (if unsuccesful)
-from a HBV-light "Data" directory.
+\code{hbv_pso_run} will try to load it from a corresponding file in the input data
+directory - first from a csv file, and then from the corrseponding HBV-light
+file (e.g. PTQ.txt for prec, airt or obs).
 }
 
