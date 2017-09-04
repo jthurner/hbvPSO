@@ -39,7 +39,7 @@ hbv_pso(prec = NULL, airt = NULL, ep = NULL, area = 1,
 \item \code{tcalt} Lapse rate to adjust the temperature data by elevation zone (ºC/100m, decreasing with elevation)
 \item \code{pcalt} Lapse rate to adjust the precipitation data by elevation zone (%/100m, increasing with elevation)
 } The last two parameters are optional and used to transform the temperature/precipitation input (instead of being passed on to TUWmodel). To disable pcalt/tcalt, set them to zero or ommit from param.
-See the example povided at \link[hbvPSO]{tuwmodel_params_default} for an example with the default ranges as specified in \link[TUWmodel]{TUWmodel}.}
+See \link[hbvPSO]{tuwmodel_params_default} for an example with the default ranges as specified in \link[TUWmodel]{TUWmodel}.}
 
 \item{obs}{Observed Discharge (mm/day) as zoo or numerical}
 
@@ -47,7 +47,7 @@ See the example povided at \link[hbvPSO]{tuwmodel_params_default} for an example
 
 \item{to}{End of the modelling period as Date or string in standard date format. Requires input datasets to be zoo objects.}
 
-\item{warmup}{Warmup phase which is removed before calculating goodness of fit. Can be given as numeric (days removed from the model start date) or date (as Date object or string in default format which can be cast to Date by as.Date). If given as date, it marks the end of the warmup period.}
+\item{warmup}{Warmup phase which is removed before calculating goodness of fit. Can be given as numeric (days removed from the model start date) or date (as Date object or string in default format which can be cast to Date by as.Date). If given as date, it marks the start of the simulation period after warmup.}
 
 \item{telev}{Reference Elevation for the air temperature input, used to adjust temperature by tcalt.}
 
@@ -83,4 +83,27 @@ A list of the following items:
 }
 \description{
 Performs particle swarm optimization of the HBV hydrological model by wrapping \link[hydroPSO]{hydroPSO} and \link[TUWmodel]{TUWmodel}.
+}
+\examples{
+\dontrun{
+# load the example data from TUWmodel
+data(example_TUWmodel, package="TUWmodel")
+# extracting the input data for the lumped case (see TUWmodel examples):
+# 1.) apply weighted means
+prec <- apply(P_Vils, 1, weighted.mean, w=areas_Vils)
+airt <- apply(T_Vils, 1, weighted.mean, w=areas_Vils)
+ep <- apply(PET_Vils, 1, weighted.mean, w=areas_Vils)
+# 2.) casting from named numeric vector to zoo
+prec <- zoo(prec, order.by=as.Date(names(prec)))
+airt <- zoo(airt, order.by=as.Date(names(airt)))
+ep <- zoo(ep, order.by=as.Date(names(ep)))
+obs <- zoo(Q_Vils, order.by=as.Date(names(Q_Vils)))
+# set up date range and warmup, limit max iterations to 500
+control <- list(maxit=500)
+from <- "1976-01-01"
+to <- "1996-12-31"
+warmup <- "1977-01-01"
+# running hbv_PSO with default options, without plotting or parallel processing
+res <- hbv_pso(prec=prec, airt=airt, ep=ep, obs=obs,hydroPSO_args = list(control=control))
+}
 }

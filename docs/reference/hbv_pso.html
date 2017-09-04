@@ -133,7 +133,7 @@
 <li><p><code>tcalt</code> Lapse rate to adjust the temperature data by elevation zone (ºC/100m, decreasing with elevation)</p></li>
 <li><p><code>pcalt</code> Lapse rate to adjust the precipitation data by elevation zone (<!-- %/100m, increasing with elevation) --></p></li>
 </ol><p>The last two parameters are optional and used to transform the temperature/precipitation input (instead of being passed on to TUWmodel). To disable pcalt/tcalt, set them to zero or ommit from param.
-See the example povided at <a href='tuwmodel_params_default.html'>tuwmodel_params_default</a> for an example with the default ranges as specified in <a href='http://www.rdocumentation.org/packages/TUWmodel/topics/TUWmodel'>TUWmodel</a>.</p></td>
+See <a href='tuwmodel_params_default.html'>tuwmodel_params_default</a> for an example with the default ranges as specified in <a href='http://www.rdocumentation.org/packages/TUWmodel/topics/TUWmodel'>TUWmodel</a>.</p></td>
     </tr>
     <tr>
       <th>obs</th>
@@ -149,7 +149,7 @@ See the example povided at <a href='tuwmodel_params_default.html'>tuwmodel_param
     </tr>
     <tr>
       <th>warmup</th>
-      <td><p>Warmup phase which is removed before calculating goodness of fit. Can be given as numeric (days removed from the model start date) or date (as Date object or string in default format which can be cast to Date by as.Date). If given as date, it marks the end of the warmup period.</p></td>
+      <td><p>Warmup phase which is removed before calculating goodness of fit. Can be given as numeric (days removed from the model start date) or date (as Date object or string in default format which can be cast to Date by as.Date). If given as date, it marks the start of the simulation period after warmup.</p></td>
     </tr>
     <tr>
       <th>telev</th>
