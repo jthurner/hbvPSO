@@ -110,6 +110,7 @@ hbv_pso_run <-
   # flatten result list
   results <- unlist(all_runs,recursive = FALSE)
   run_time <- difftime(Sys.time(), start_time, units="secs")
+  print(batch_summary)
   message("Execution time (hours:minutes:seconds): ",format(.POSIXct(run_time, tz="UTZ"), "%H:%M:%S"))
   return(list(summary=batch_summary,results=results))
 }
@@ -181,7 +182,7 @@ hbv_pso_run_single <- function(configfile,...){
       else {
         return(NULL)
       }
-    }, base_path)
+    }, simplify=FALSE, USE.NAMES=TRUE, base_path)
 
     list2env(vars_from_csv,envir=config_env)
     # read in missing data from hbv-light files
@@ -218,9 +219,10 @@ hbv_pso_run_single <- function(configfile,...){
 
   if (!is.null(config_env$from_validation)) {
     output_path <- file.path(output_path,"validation")
-    if(is.list(plotting))
+    if(is.list(plotting)) {
       sim_obs_fname <- file.path(output_path, paste0(id,"_ggof-validation",".png"))
       plotting <- list(png.fname=sim_obs_fname, main = paste0(id,"-validation"))
+    }
 
     optimized_validation = hbv_pso(
       prec = config_env$prec,
