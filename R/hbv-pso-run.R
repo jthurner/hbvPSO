@@ -141,6 +141,14 @@ hbv_pso_run_single <- function(configfile,...){
   } else if (isTRUE(plotting)) {
     plotting <- list()
   }
+
+  # ensure objective function defaults are correct if FUN_gof is NULL
+  if (is.null(config_env$FUN_gof)) {
+    config_env$FUN_gof <- hydroGOF::NSE
+    config_env$FUN_gof_args <- NULL
+    config_env$gof.name <- "NSE"
+  }
+
   # if defined, gof.name sets plotting$gof.name. if not, get it from plotting
   gof.name <- config_env$gof.name
   if (is.list(plotting)) {
@@ -166,7 +174,6 @@ hbv_pso_run_single <- function(configfile,...){
       plotting <- plot_args
     }
   }
-
 
   var_names <- c("prec","airt","ep","obs","area","elev_zones")
   # check for missing time series
@@ -195,7 +202,10 @@ hbv_pso_run_single <- function(configfile,...){
     if (length(missing_vars) > 0)
       stop("Could not find the following input data for " ,id, ": ",paste(missing_vars,collapse=","))
   }
-  optimized <- hbv_pso(
+
+
+  # collecting arguments for hbv_pso
+  hbv_pso_args <- list(
     prec = config_env$prec,
     airt = config_env$airt,
     ep = config_env$ep,
@@ -213,37 +223,25 @@ hbv_pso_run_single <- function(configfile,...){
     hydroPSO_args = config_env$hydroPSO_args,
     FUN_gof = config_env$FUN_gof,
     FUN_gof_args = config_env$FUN_gof_args,
-    plotting = plotting
+    plotting = plotting)
 
-  )
+  # remove arguments with value NULL
+  hbv_pso_args <- hbv_pso_args[!sapply(hbv_pso_args, is.null)]
+
+  optimized <- do.call(hbv_pso,hbv_pso_args)
 
   if (!is.null(config_env$from_validation)) {
-    output_path <- file.path(output_path,"validation")
+    hbv_pso_args$outpath <- file.path(output_path,"validation")
+    hbv_pso_args$param <- optimized$pso_out$par
+    hbv_pso_args$to <- config_env$to_validation
+    hbv_pso_args$warmup <- config_env$from_validation
+
     if(is.list(plotting)) {
       sim_obs_fname <- file.path(output_path, paste0(id,"_ggof-validation",".png"))
-      plotting <- list(png.fname=sim_obs_fname, main = paste0(id,"-validation"))
+      hbv_pso_args$plotting <- list(png.fname=sim_obs_fname, main = paste0(id,"-validation"))
     }
 
-    optimized_validation = hbv_pso(
-      prec = config_env$prec,
-      airt = config_env$airt,
-      ep = config_env$ep,
-      area = config_env$area,
-      elev_zones = config_env$elev_zones,
-      param = optimized$pso_out$par,
-      obs = config_env$obs,
-      from = config_env$from,
-      to = config_env$to_validation,
-      warmup = config_env$from_validation,
-      pelev = config_env$pelev,
-      telev = config_env$telev,
-      incon = config_env$incon,
-      outpath = output_path,
-      hydroPSO_args = config_env$hydroPSO_args,
-      FUN_gof = config_env$FUN_gof,
-      FUN_gof_args = config_env$FUN_gof_args,
-      plotting = plotting
-    )
+    optimized_validation <- do.call(hbv_pso,hbv_pso_args)
   } else {
     optimized_validation <- NULL
   }
