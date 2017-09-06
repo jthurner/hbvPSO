@@ -128,17 +128,12 @@ hbv_pso <- function(prec = NULL,
     FUN_gof_args <- NULL
   }
   if (is.null(param)) {
-    param = hbvPSO::tuwmodel_params_default
+    param <- hbvPSO::tuwmodel_params_default
   }
 
   # force plotting to be a list if we should plot, FALSE otherwise
   if (isTRUE(plotting))
-    plotting = list()
-
-  # if gof.name is not defined, set it to the name of the objective function
-  if (is.list(plotting) && is.null(plotting$gof.name)) {
-    plotting$gof.name <- gsub("^.*:","", deparse(substitute(FUN_gof)))
-  }
+    plotting <- list()
 
   # capture arguments into list for processing & handing off to hydroPSO
   args_list <- as.list(environment())
@@ -317,6 +312,10 @@ hbv_pso <- function(prec = NULL,
   }
   if (is.list(plotting)) {
     if(do_optimize) {
+      # if gof.name is not defined, set it to the name of the objective function
+      if (is.null(plotting$gof.name)) {
+        plotting$gof.name <- gsub("^.*:","", deparse(substitute(FUN_gof)))
+      }
       plot_args <- list(sim=zoo::coredata(sim),obs=obs,drty.out=outpath,do.png=TRUE,MinMax="max",
                           beh.thr=0.0, ftype="dm", legend.pos="right")
       FUN_plot <- hydroPSO::plot_results
