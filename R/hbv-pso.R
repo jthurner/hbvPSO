@@ -380,12 +380,6 @@ hbv_single <-  function(prec,
   if (pcalt_applied == FALSE)
     prec <- apply_pcalt(series = prec, elev_zones = elev_zones, pelev = pelev,
                         lapse_rate = param[17])
-
-  # TUWmodel does not model by zone if prec is a vector. Therefore prec must be
-  # converted to a matrix of appropriate dimensions if zones are used
-  nelev_zones <- length(area)
-  if (nelev_zones > 1 && NCOL(prec) == 1)
-    prec <- matrix(rep(prec, nelev_zones), ncol = nelev_zones)
   # run the model
   hbv_out <- TUWmodel::TUWmodel(prec, airt, ep, area, param[1:15])
   # remove warmup period from simulated Q
