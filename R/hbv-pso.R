@@ -276,6 +276,7 @@ hbv_pso <- function(prec = NULL,
   # Run hydroPSO if we have a parameter range
   if (do_optimize) {
     hydroPSO_args_default <- list(lower=param[, 1], upper = param[, 2], fn="hbv_single")
+    # merging user-provided arguments with default args
     hydroPSO_args <- c(hydroPSO_args,hydroPSO_args_default[!(names(hydroPSO_args_default) %in% names(hydroPSO_args))])
 
     # run hydroPSO

@@ -105,14 +105,15 @@ hbv_pso_run <-
                         pattern = "(?i)^run.*\\.R$")
   all_runs <-lapply(c(configs,configpath[!isdir]),hbv_pso_run_single,...)
   # build summary dataframe and remove from results
-  batch_summary <- do.call(rbind,lapply(all_runs, `[[`, 3))
-  all_runs = lapply(all_runs,`[`,1:2)
+  batch_summary <- do.call(rbind,lapply(all_runs, `[[`, "summary"))
+  batch_summary_par<- do.call(rbind,lapply(all_runs, `[[`, "summary_par"))
+  all_runs = lapply(all_runs,`[[`,"results")
   # flatten result list
   results <- unlist(all_runs,recursive = FALSE)
   run_time <- difftime(Sys.time(), start_time, units="secs")
   print(batch_summary)
   message("Execution time (hours:minutes:seconds): ",format(.POSIXct(run_time, tz="UTZ"), "%H:%M:%S"))
-  return(list(summary=batch_summary,results=results))
+  return(list(summary=batch_summary,summary_par = batch_summary_par, results=results))
 }
 
 #' Title
@@ -130,6 +131,7 @@ hbv_pso_run_single <- function(configfile,...){
   # TODO: error handling if read.zoo fails/produces unexpected results?
 
   base_path <- dirname(configfile)
+  print(paste("Running",configfile))
   config_env <- new.env()
   source(configfile, local = config_env, chdir = TRUE)
   list2env(list(...), envir = config_env)
@@ -199,6 +201,7 @@ hbv_pso_run_single <- function(configfile,...){
         list2env(ts_from_hbv_light,envir=config_env)
     }
     missing_vars <- var_names[sapply(var_names, function(x) is.null(config_env[[x]]))]
+    #TODO: area and elev_zone are optional!
     if (length(missing_vars) > 0)
       stop("Could not find the following input data for " ,id, ": ",paste(missing_vars,collapse=","))
   }
@@ -246,15 +249,27 @@ hbv_pso_run_single <- function(configfile,...){
     optimized_validation <- NULL
   }
 
-  summary <- data.frame(id = paste(c(basename(base_path),suffix),collapse = "-"),
-      gof_name = ifelse(is.null(gof.name),NA, gof.name),
-      gof = round(optimized$gof,3),
-      gof_validation = ifelse(is.null(optimized_validation),NA,round(optimized_validation$gof,3)),
-      from = ifelse(is.null(config_env$from),NA, config_env$from),
-      to = ifelse(is.null(config_env$to),NA, config_env$to),
-      from_validation = ifelse(is.null(config_env$from_validation),NA, config_env$from_validation),
-      to_validation = ifelse(is.null(config_env$to_validation),NA, config_env$to_validation),
-      stringsAsFactors = FALSE
+  summary_base <- data.frame(
+    id = paste(c(basename(base_path),suffix),collapse = "-"),
+    gof_name = ifelse(is.null(gof.name),NA, gof.name),
+    gof = round(optimized$gof,3),
+    stringsAsFactors = FALSE
   )
-  return(setNames(list(optimized,optimized_validation,summary),c(id,paste0(id,"_validation"),"summary")))
+  summary_gof <- data.frame(
+    gof_validation = ifelse(
+      is.null(optimized_validation),NA,round(optimized_validation$gof,3)),
+    from = ifelse(is.null(config_env$from),NA, config_env$from),
+    to = ifelse(is.null(config_env$to),NA, config_env$to),
+    from_validation = ifelse(
+      is.null(config_env$from_validation),NA, config_env$from_validation),
+    to_validation = ifelse(is.null(config_env$to_validation),NA, config_env$to_validation),
+    stringsAsFactors = FALSE
+  )
+
+  res <- list(results=list(),
+              summary=cbind(summary_base,summary_gof),
+              summary_par = cbind(summary_base,t(optimized$pso_out$par)))
+  res$results[[id]] <- optimized
+  res$results[[paste0(id,"_validation")]] <- optimized_validation
+  return(res)
 }

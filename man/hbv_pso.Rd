@@ -86,7 +86,7 @@ Performs particle swarm optimization of the HBV hydrological model by wrapping \
 }
 \examples{
 \dontrun{
-# load the example data from TUWmodel
+# loading the example data from TUWmodel
 data(example_TUWmodel, package="TUWmodel")
 # extracting the input data for the lumped case (see TUWmodel examples):
 # 1.) apply weighted means
@@ -98,7 +98,7 @@ prec <- zoo(prec, order.by=as.Date(names(prec)))
 airt <- zoo(airt, order.by=as.Date(names(airt)))
 ep <- zoo(ep, order.by=as.Date(names(ep)))
 obs <- zoo(Q_Vils, order.by=as.Date(names(Q_Vils)))
-# set up date range and warmup, limit max iterations to 500
+# setting up date range and warmup, limit max iterations to 500
 control <- list(maxit=500)
 from <- "1976-01-01"
 to <- "1996-12-31"
