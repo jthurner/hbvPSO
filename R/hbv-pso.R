@@ -289,7 +289,7 @@ hbv_pso <- function(prec = NULL,
     args_list$param <- param
   }
 
-  args_list$gof_only <- FALSE
+  args_list$as_hydromod <- FALSE
   bestrun <- do.call(hbv_single, args_list)
 
   if (zoo::is.zoo(obs)) {
@@ -350,7 +350,7 @@ hbv_pso <- function(prec = NULL,
 #' @param FUN_gof_args
 #' @param pcalt_applied
 #' @param tcalt_applied
-#' @param gof_only
+#' @param as_hydromod
 #' @param FUN_gof
 #'
 #' @return
@@ -372,7 +372,7 @@ hbv_single <-  function(prec,
                        FUN_gof_args = NULL,
                        pcalt_applied = FALSE,
                        tcalt_applied = FALSE,
-                       gof_only = TRUE) {
+                       as_hydromod = TRUE) {
 
 
   if (tcalt_applied == FALSE)
@@ -386,13 +386,13 @@ hbv_single <-  function(prec,
   # remove warmup period from simulated Q
   sim <- as.numeric(hbv_out$q)[-(1:warmup)]
   # if there are any NA in qsim, directly return NA as GoF
-  if (any(is.na(sim)) && gof_only)
-    return(NA)
+  if (any(is.na(sim)) && as_hydromod)
+    return(list(GoF=NA,model.out=NA))
   FUN_gof_args = c(list(sim = sim, obs = obs), FUN_gof_args)
   gof <- (do.call(FUN_gof, FUN_gof_args))
   # combine sim and obs with any additional args to FUN_gof
-  if (gof_only) {
-    return(gof)
+  if (as_hydromod) {
+    +    return(list(GoF=gof,model.out=sim))
   } else {
     # remove warmup from all components
     hbv_out$q <- sim

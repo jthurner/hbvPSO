@@ -7,7 +7,7 @@
 hbv_single(prec, airt, ep, area, param, elev_zones, obs, warmup, pelev = NULL,
   telev = NULL, incon = NULL, FUN_gof = hydroGOF::NSE,
   FUN_gof_args = NULL, pcalt_applied = FALSE, tcalt_applied = FALSE,
-  gof_only = TRUE)
+  as_hydromod = TRUE)
 }
 \arguments{
 \item{FUN_gof}{}
