@@ -129,6 +129,7 @@ hbv_pso_run_single <- function(configfile,...){
   # TODO: find a away to allow setting nested parameters through ...,
   #       e.g. maxit inside hydroGOF_args$control? list merges?
   # TODO: error handling if read.zoo fails/produces unexpected results?
+  # TODO: test everything with non-ts inputs
 
   base_path <- dirname(configfile)
   print(paste("Running",configfile))
@@ -258,7 +259,7 @@ hbv_pso_run_single <- function(configfile,...){
   summary_gof <- data.frame(
     gof_validation = ifelse(
       is.null(optimized_validation),NA,round(optimized_validation$gof,3)),
-    from = ifelse(is.null(config_env$from),NA, config_env$from),
+    from = ifelse(is.null(config_env$warmup),config_env$from, config_env$warmup),
     to = ifelse(is.null(config_env$to),NA, config_env$to),
     from_validation = ifelse(
       is.null(config_env$from_validation),NA, config_env$from_validation),
