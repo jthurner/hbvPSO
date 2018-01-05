@@ -313,12 +313,14 @@ hbv_pso <- function(prec = NULL,
   }
   if (is.list(plotting)) {
     if(do_optimize) {
+      param.names <- rownames(param)[param[,1] != param[,2]]
       # if gof.name is not defined, set it to the name of the objective function
       if (is.null(plotting$gof.name)) {
         plotting$gof.name <- gsub("^.*:","", deparse(substitute(FUN_gof)))
       }
-      plot_args <- list(sim=zoo::coredata(sim),obs=obs,drty.out=outpath,do.png=TRUE,MinMax="max",
-                          beh.thr=0.0, ftype="dm", legend.pos="right")
+      plot_args <- list(sim=zoo::coredata(sim), obs=obs, drty.out=outpath,
+                        param.names = param.names, do.png=TRUE,MinMax="max",
+                        beh.thr=0.0, ftype="dm", legend.pos="right")
       FUN_plot <- hydroPSO::plot_results
     } else {
       plot_args <- list(sim=zoo::coredata(sim), obs=obs, ptype="ts", MinMax="max", ftype="dm",
