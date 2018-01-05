@@ -13,4 +13,7 @@ parse_hbv_light(hbv_light_dir, prec = TRUE, airt = TRUE, ep = TRUE,
 \description{
 not supported: sub-daily values, 360day calendar
 }
+\examples{
+# TODO: ref ts if no ptq
+}
 \keyword{internal}
