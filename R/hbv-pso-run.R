@@ -95,6 +95,8 @@
 hbv_pso_run <-
   function(configpath, recursive = FALSE, suffix = NULL, gof.name = NULL,
            from_validation = NULL, to_validation = NULL, ...) {
+  # TODO: abstract common tasks (e.g. ts loading) into util function
+  # TODO: plotting list<->TRUE conversion done in multiple places?
   start_time <- Sys.time()
   isdir <- sapply(configpath,function(x) file.info(x)$isdir)
   dirs <- configpath[isdir]
@@ -131,7 +133,6 @@ hbv_pso_run_single <- function(configfile,...){
   # TODO: error handling if read.zoo fails/produces unexpected results?
   # TODO: test everything with non-ts inputs
 
-  base_path <- dirname(configfile)
   print(paste("Running",configfile))
   config_env <- new.env()
   source(configfile, local = config_env, chdir = TRUE)
@@ -164,8 +165,14 @@ hbv_pso_run_single <- function(configfile,...){
 
   suffix <- config_env$suffix
 
-  id <- paste(c(basename(base_path), gof.name, suffix), collapse = "_")
-  output_path <- file.path(base_path,id)
+  config_dir <- dirname(configfile)
+  id <- paste(c(basename(config_dir), gof.name, suffix), collapse = "_")
+  if (is.null(config_env$outpath)) {
+    output_path <- file.path(config_dir, "hbv", id)
+  } else {
+    output_path <- file.path(config_env$outpath, "hbv", id)
+  }
+
 
   # set sim-obs plot titles and file names to id
   sim_obs_fname <- paste0(id,".png")
@@ -183,8 +190,8 @@ hbv_pso_run_single <- function(configfile,...){
   missing_vars <- var_names[sapply(var_names, function(x) is.null(config_env[[x]]))]
   if (length(missing_vars) > 0) {
     # read in missing data from csv files
-    vars_from_csv <- sapply(missing_vars, function(x, base_path) {
-      fp <- list.files(base_path, full.names = TRUE,
+    vars_from_csv <- sapply(missing_vars, function(x, config_dir) {
+      fp <- list.files(config_dir, full.names = TRUE,
                        pattern = paste0("(?i)", x, "(\\.csv|\\.txt)?$"))[1]
       if (!is.na(fp)) {
         return(zoo::read.zoo(fp))
@@ -192,13 +199,13 @@ hbv_pso_run_single <- function(configfile,...){
       else {
         return(NULL)
       }
-    }, simplify=FALSE, USE.NAMES=TRUE, base_path)
+    }, simplify=FALSE, USE.NAMES=TRUE, config_dir)
 
     list2env(vars_from_csv,envir=config_env)
     # read in missing data from hbv-light files
     missing_vars <- sapply(var_names, function(x) is.null(config_env[[x]]))
     if (any(missing_vars)) {
-        ts_from_hbv_light <- do.call(parse_hbv_light,c(hbv_light_dir=base_path,as.list(missing_vars)))
+        ts_from_hbv_light <- do.call(parse_hbv_light,c(hbv_light_dir=config_dir,as.list(missing_vars)))
         list2env(ts_from_hbv_light,envir=config_env)
     }
     missing_vars <- var_names[sapply(var_names, function(x) is.null(config_env[[x]]))]
@@ -251,7 +258,7 @@ hbv_pso_run_single <- function(configfile,...){
   }
 
   summary_base <- data.frame(
-    id = paste(c(basename(base_path),suffix),collapse = "-"),
+    id = paste(c(basename(config_dir),suffix),collapse = "-"),
     gof_name = ifelse(is.null(gof.name),NA, gof.name),
     gof = round(optimized$gof,3),
     stringsAsFactors = FALSE
