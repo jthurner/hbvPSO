@@ -103,7 +103,7 @@ validate_input <- function(e) {
   # zones checking
   if (!is.null(e$elev_zones) &&  length(e$elev_zones) != length(e$area))
     stop("Elevation zone and area must have the same length")
-  if (sum(e$area) != 1)
+  if (!isTRUE(all.equal(sum(e$area),1)))
     stop("The sum of \"area\" must be 1")
 
   wrong_dim <- names(Filter(function(x, n_area = length(e$area)) {
@@ -140,7 +140,7 @@ validate_input <- function(e) {
     no_end <- names(Filter(function(x) end(x) < e$to, e[ts_names]))
     if (length(no_end) > 0) {
       no_end <- paste0(no_end, collapse = ", ")
-      stop("The following time series end after \"to\":", no_end)
+      stop("The following time series end before \"to\":", no_end)
     }
     # cut timeseries to start/end
     e[ts_names] = lapply(e[ts_names], FUN = window,
