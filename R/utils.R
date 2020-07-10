@@ -58,7 +58,7 @@ hbv_single <-  function(prec,
   gof <- (do.call(FUN_gof, FUN_gof_args))
   # combine sim and obs with any additional args to FUN_gof
   if (as_hydromod) {
-    +    return(list(GoF=gof,model.out=sim))
+        return(list(GoF=gof,model.out=sim))
   } else {
     # remove warmup from all components
     hbv_out$q <- sim

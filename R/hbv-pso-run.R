@@ -245,7 +245,8 @@ hbv_pso_run_single <- function(configfile,...){
     hbv_pso_args$outpath <- file.path(output_path,"validation")
     hbv_pso_args$param <- optimized$pso_out$par
     hbv_pso_args$to <- config_env$to_validation
-    hbv_pso_args$warmup <- config_env$from_validation
+    hbv_pso_args$from <- config_env$from_validation
+    hbv_pso_args$warmup <- config_env$warmup_validation
 
     if(is.list(plotting)) {
       sim_obs_fname <- file.path(output_path, paste0(id,"_ggof-validation",".png"))
