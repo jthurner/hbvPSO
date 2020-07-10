@@ -36,7 +36,7 @@
 #'
 #' @section Input data definition: For each optimization run, the following
 #'   variables have to be defined and contain valid values as defined in
-#'   [hbv_pso()]: prec, airt, ep, obs, area, elev_zones. The input data
+#'   [hbv_pso()]: prec, airt, ep, obs, area. The input data
 #'   can be assinged in the following ways (in descending order of precedence):
 #'
 #'   1. *assignment inside the configfile*: Add code which assigns the input
@@ -185,7 +185,7 @@ hbv_pso_run_single <- function(configfile,...){
     }
   }
 
-  var_names <- c("prec","airt","ep","obs","area","elev_zones")
+  var_names <- c("prec","airt","ep","obs","area")
   # check for missing time series
   missing_vars <- var_names[sapply(var_names, function(x) is.null(config_env[[x]]))]
   if (length(missing_vars) > 0) {
@@ -209,7 +209,7 @@ hbv_pso_run_single <- function(configfile,...){
         list2env(ts_from_hbv_light,envir=config_env)
     }
     missing_vars <- var_names[sapply(var_names, function(x) is.null(config_env[[x]]))]
-    #TODO: area and elev_zone are optional!
+    #TODO: area is optional!
     if (length(missing_vars) > 0)
       stop("Could not find the following input data for " ,id, ": ",paste(missing_vars,collapse=","))
   }
@@ -221,7 +221,6 @@ hbv_pso_run_single <- function(configfile,...){
     airt = config_env$airt,
     ep = config_env$ep,
     area = config_env$area,
-    elev_zones = config_env$elev_zones,
     param = config_env$param,
     obs = config_env$obs,
     from = config_env$from,

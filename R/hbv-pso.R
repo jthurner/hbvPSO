@@ -22,17 +22,11 @@
 #' \item \code{cperc} constant percolation rate (0.0-8.0 mm/timestep);
 #' \item \code{bmax} maximum base at low flows (0.0-30.0 timestep);
 #' \item \code{croute} free scaling parameter (0.0-50.0 timestep2/mm);
-#' \item \code{tcalt} Lapse rate to adjust the temperature data by elevation zone (ºC/100m, decreasing with elevation)
-#' \item \code{pcalt} Lapse rate to adjust the precipitation data by elevation zone (%/100m, increasing with elevation)
-#' } The last two parameters are optional and used to transform the temperature/precipitation input (instead of being passed on to TUWmodel). To disable pcalt/tcalt, set them to zero or ommit from param.
 #' See \link[hbvPSO]{tuwmodel_params_default} for an example with the default ranges as specified in \link[TUWmodel]{TUWmodel}.
 #' @param obs Observed Discharge (mm/day) as zoo or numerical
 #' @param from Start of the modelling period (including warmup) as Date or string in standard date format. Requires input datasets to be zoo objects.
 #' @param to End of the modelling period as Date or string in standard date format. Requires input datasets to be zoo objects.
 #' @param warmup Warmup phase which is removed before calculating goodness of fit. Can be given as numeric (days removed from the model start date) or date (as Date object or string in default format which can be cast to Date by as.Date). If given as date, it marks the start of the simulation period after warmup.
-#' @param telev Reference Elevation for the air temperature input, used to adjust temperature by tcalt.
-#' @param pelev Reference Elevation for the precipitation input, used to adjust precipitation by pcalt.
-#' @param elev_zones Vector of mean elevation for each zone. Only required if tcalt/pcalt is used.
 #' @param incon vector/matrix of initial conditions for the model (\code{ncol} = number of zones):
 #' \code{SSM0} soil moisture (mm);
 #' \code{SWE0} snow water equivalent (mm);
@@ -89,9 +83,6 @@ hbv_pso <- function(prec = NULL,
                     from = NULL,
                     to = NULL,
                     warmup = 0,
-                    telev = NULL,
-                    pelev = NULL,
-                    elev_zones = NULL,
                     incon = NULL,
                     outpath=NULL,
                     hydroPSO_args = NULL,

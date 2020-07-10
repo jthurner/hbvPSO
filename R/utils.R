@@ -8,13 +8,8 @@
 #' @param obs
 #' @param warmup
 #' @param ep
-#' @param elev_zones
-#' @param pelev
-#' @param telev
 #' @param incon
 #' @param FUN_gof_args
-#' @param pcalt_applied
-#' @param tcalt_applied
 #' @param as_hydromod
 #' @param FUN_gof
 #'
@@ -27,27 +22,16 @@ hbv_single <-  function(prec,
                         ep,
                         area,
                         param,
-                        elev_zones,
                         obs,
                         warmup,
-                        pelev = NULL,
-                        telev = NULL,
                         incon = NULL,
                         FUN_gof = hydroGOF::NSE,
                         FUN_gof_args = NULL,
-                        pcalt_applied = FALSE,
-                        tcalt_applied = FALSE,
                         as_hydromod = TRUE) {
 
   # TODO: hbv_out as vector?
-  if (tcalt_applied == FALSE)
-    airt <- apply_tcalt(series = airt, elev_zones = elev_zones, telev = telev,
-                        lapse_rate = param[16])
-  if (pcalt_applied == FALSE)
-    prec <- apply_pcalt(series = prec, elev_zones = elev_zones, pelev = pelev,
-                        lapse_rate = param[17])
   # run the model
-  hbv_out <- TUWmodel::TUWmodel(prec, airt, ep, area, param[1:15])
+  hbv_out <- TUWmodel::TUWmodel(prec, airt, ep, area, param)
   # remove warmup period from simulated Q
   # TODO: This fails for multi-zone!! use tail instead?
   sim <- as.numeric(hbv_out$q)[-(1:warmup)]
@@ -80,16 +64,12 @@ validate_input <- function(e) {
     stop("Observed discharge (\"obs\") must be univariate")
   }
 
-  # param has to be 15-17 rows long, tcalt/pcalt is optional and added as 0 if missing
+  # param has to be 15 rows long
   e$param <- as.matrix(e$param)
   nrow_par <- nrow(e$param)
   ncol_par <- ncol(e$param)
-  if ((nrow_par > 17  || nrow_par < 15) || (ncol_par > 2 || ncol_par < 1)) {
+  if ((nrow_par != 15) || (ncol_par > 2 || ncol_par < 1)) {
     stop("Wrong number of parameters in param")
-  } else if (nrow_par < 17) {
-    nrow_missing <- 17-nrow_par
-    names_missing <- list(c("tcalt","pcalt")[1:nrow_missing])
-    e$param <- rbind(e$param, matrix(0,nrow_missing,ncol_par,dimnames=names_missing))
   }
 
   ts_names <- c("prec", "airt", "ep", "obs")
@@ -100,9 +80,7 @@ validate_input <- function(e) {
     stop("The following arguments have the wrong class (must be vectors, matrices or zoo objects):",
          not_numeric)
   }
-  # zones checking
-  if (!is.null(e$elev_zones) &&  length(e$elev_zones) != length(e$area))
-    stop("Elevation zone and area must have the same length")
+  # area fractions must sum up to one
   if (!isTRUE(all.equal(sum(e$area),1,tolerance=0.0001)))
     stop("The sum of \"area\" must be 1")
 
@@ -178,109 +156,5 @@ validate_input <- function(e) {
   # convert any zoo ts to vector/matrix
   e[ts_names] <- lapply(e[ts_names], FUN = zoo::coredata)
 
-  # apply {p,t}calt if not used for calibration. if set to zero,
-  # the input series will be used as is
-  tcalt <- unique(e$param[16, ])
-  if (any(tcalt != 0) && (is.null(e$telev) || is.null(e$elev_zones)))
-    stop("If tcalt is used (param[16,] != 0), Parameters \"telev\" and \"elev_zones\" must be set.")
-
-  if (length(tcalt) == 1) {
-    e$airt <- apply_tcalt( series = e$airt,
-                                   elev_zones = e$elev_zones, telev = e$telev,
-                                   lapse_rate = tcalt)
-    e$tcalt_applied = TRUE
-  }
-  pcalt <- unique(e$param[17, ])
-  if (any(pcalt != 0) && (is.null(e$pelev) || is.null(e$elev_zones)))
-    stop("If pcalt is used (param[17,] != 0), Parameters \"pelev\" and \"elev_zones\" must be set.")
-
-  if (length(pcalt) == 1) {
-    e$prec <- apply_pcalt(series = e$prec,
-                                  elev_zones = e$elev_zones, pelev = e$pelev,
-                                  lapse_rate = pcalt)
-    e$pcalt_applied = TRUE
-  }
-
   return(e)
-}
-
-
-
-#' Title
-#'
-#' @param series
-#' @param elev_zones
-#' @param lapse_rate
-#' @param pelev
-#'
-#' @return
-#' @export
-#' @keywords internal
-#'
-#' @examples
-apply_pcalt <- function(series, elev_zones, pelev, lapse_rate) {
-  # transform from percent to decimal proportion
-  lapse_rate <- round((lapse_rate / 100),2)
-  # if (lapse_rate < 1)
-  #   warning("pcalt should be specified in decimal proportions, but the given values was above 1(",lapse_rate,"). Input was assumed to be in percent and divided by 100.")
-  return(apply_lapse_rate(series, elev_zones, pelev, lapse_rate,
-                          type = "rel", neg.tozero = TRUE))
-}
-
-#' Title
-#'
-#' @param series
-#' @param elev_zones
-#' @param lapse_rate
-#' @param telev
-#'
-#' @return
-#' @export
-#' @keywords internal
-#' @examples
-apply_tcalt <- function(series, elev_zones, telev, lapse_rate) {
-  # make sure tcalt is negative
-  lapse_rate <- abs(lapse_rate) * -1
-  return(apply_lapse_rate(series, elev_zones, telev, lapse_rate,
-                          type = "abs", neg.tozero = FALSE))
-}
-
-
-#' Title
-#'
-#' @param series
-#' @param elev_zones
-#' @param elev_ref
-#' @param lapse_rate
-#' @param type
-#' @param neg.tozero
-#'
-#' @return
-#' @keywords internal
-#' @examples
-apply_lapse_rate <- function(series, elev_zones, elev_ref, lapse_rate,
-                             type = "rel", neg.tozero = TRUE) {
-  # TODO: does it make sense to allow lapse_rate for multi-columns series?
-  if (lapse_rate == 0)
-    return(series)
-  if (NCOL(series) > 1)
-    stop("If using pcalt/tcalt, the corresponding time series must be univariate")
-  nelev_zones <- length(elev_zones)
-  series <- matrix(rep(series, nelev_zones), ncol = nelev_zones)
-  lapse_rates <- (elev_zones - elev_ref) / 100 * lapse_rate
-  if (type == "rel") {
-    lapse_rates <- lapse_rates + 1
-    if (neg.tozero) {
-      lapse_rates[lapse_rates < 0] <- 0
-    }
-    series_adj <- series %*% diag(lapse_rates)
-  } else if (type == "abs") {
-    series_adj <- sweep(series, 2, FUN = "+", lapse_rates)
-    if (neg.tozero) {
-      series_adj[series_adj < 0] <- 0
-    }
-  } else {
-    stop("Type must be either \"rel\" (relative difference) or \"abs\" (absolute difference)")
-  }
-  return(round(series_adj, 5))
 }

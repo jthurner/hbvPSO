@@ -4,7 +4,8 @@
 \name{tuwmodel_params_default}
 \alias{tuwmodel_params_default}
 \title{Default parameter ranges for TUWmodel}
-\format{A matrix with two columns, min and max, and the following parameters as rows:
+\format{
+A matrix with two columns, min and max, and the following parameters as rows:
 \enumerate{
 \item \code{SCF} snow correction factor (0.9-1.5);
 \item \code{DDF} degree day factor (0.0-5.0 mm/degC/timestep);
@@ -21,9 +22,8 @@
 \item \code{cperc} constant percolation rate (0.0-8.0 mm/timestep);
 \item \code{bmax} maximum base at low flows (0.0-30.0 timestep);
 \item \code{croute} free scaling parameter (0.0-50.0 timestep2/mm);
-\item \code{tcalt} Lapse rate to adjust the temperature data by elevation zone (ºC/100m, decreasing with elevation)
-\item \code{pcalt} Lapse rate to adjust the precipitation data by elevation zone (%/100m, increasing with elevation)
-}}
+}
+}
 \usage{
 tuwmodel_params_default
 }

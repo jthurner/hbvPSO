@@ -20,8 +20,6 @@
 #' \item \code{cperc} constant percolation rate (0.0-8.0 mm/timestep);
 #' \item \code{bmax} maximum base at low flows (0.0-30.0 timestep);
 #' \item \code{croute} free scaling parameter (0.0-50.0 timestep2/mm);
-#' \item \code{tcalt} Lapse rate to adjust the temperature data by elevation zone (ºC/100m, decreasing with elevation)
-#' \item \code{pcalt} Lapse rate to adjust the precipitation data by elevation zone (%/100m, increasing with elevation)
 #' }
 "tuwmodel_params_default"
 
