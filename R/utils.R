@@ -103,7 +103,7 @@ validate_input <- function(e) {
   # zones checking
   if (!is.null(e$elev_zones) &&  length(e$elev_zones) != length(e$area))
     stop("Elevation zone and area must have the same length")
-  if (!isTRUE(all.equal(sum(e$area),1)))
+  if (!isTRUE(all.equal(sum(e$area),1,tolerance=0.0001)))
     stop("The sum of \"area\" must be 1")
 
   wrong_dim <- names(Filter(function(x, n_area = length(e$area)) {
