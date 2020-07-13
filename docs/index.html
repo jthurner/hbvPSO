@@ -35,7 +35,22 @@
   </a>
 </li>
 <li>
+  <a href="articles/hbvPSO.html">Get Started</a>
+</li>
+<li>
   <a href="reference/index.html">Reference</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+<li>
+      <a href="articles/test.html">HTML-Class Demo</a>
+    </li>
+  </ul>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -62,35 +77,27 @@
     
 <div class="contents">
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-<div id="hbvpso-r-package" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#hbvpso-r-package" class="anchor"></a>hbvPSO (R package)</h1></div>
+<section id="hbvpso-r-package" class="level1"><div class="page-header"><h1>hbvPSO (R package)</h1></div>
 <p>
 </p>
 <p>hbvPSO provides an easy way to apply particle swarm optimization to the HBV rainfall-runoff model. It uses the <a href="https://cran.r-project.org/web/packages/hydroPSO/index.html">hydroPSO</a> package for the optimization and the <a href="https://cran.r-project.org/web/packages/TUWmodel/index.html">TUWmodel</a> package for the model itself. Input parameters can optionally be supplied as configuration files written in R, and multiple optimization runs can be executed in batches. Contains some helper functions to import data and settings from HBV-light.</p>
 <p>Developed at <a href="http://www.tt.th-koeln.de/">ITT Cologne</a>.</p>
-<div id="installation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#installation" class="anchor"></a>Installation</h2>
+<section id="installation" class="level2"><h2>Installation</h2>
 <p>You can install hbvPSO from github with:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># install.packages("devtools")</span>
-devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"jthurner/hbvPSO"</span>)</code></pre></div>
-</div>
-<div id="status" class="section level2">
-<h2 class="hasAnchor">
-<a href="#status" class="anchor"></a>Status</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># install.packages("devtools")</span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2">devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"jthurner/hbvPSO"</span>)</a></code></pre></div>
+</section><section id="status" class="level2"><h2>Status</h2>
 <p>This package is still work-in-progress. Using multiple zones does not work reliably at the moment. You might also need to install patched versions of some dependencies to get full functionality:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># required to allow plotting of sim-obs graph:</span>
-devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"jthurner/hydroPSO"</span>,<span class="dt">ref =</span> <span class="st">"plotting"</span>)
-<span class="co"># adds lnNSE to the objective functions in the sim-obs graph: </span>
-devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"hzambran/hydroGOF"</span>,<span class="dt">ref =</span> <span class="st">"ggof-lnnse"</span>)</code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># required to allow plotting of sim-obs graph:</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"jthurner/hydroPSO"</span>,<span class="dt">ref =</span> <span class="st">"plotting"</span>)</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="co"># adds lnNSE to the objective functions in the sim-obs graph: </span></a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"hzambran/hydroGOF"</span>,<span class="dt">ref =</span> <span class="st">"ggof-lnnse"</span>)</a></code></pre></div>
 <!-- ## Example -->
 <!-- This is a basic example which shows you how to solve a common problem: -->
 <!-- ```{r example} -->
 <!-- ## basic example code -->
 <!-- ``` -->
-</div>
-</div>
+</section></section>
 </div>
   </div>
 

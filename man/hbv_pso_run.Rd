@@ -4,8 +4,15 @@
 \alias{hbv_pso_run}
 \title{(Batch-) Run Particle Swarm Optimizations of the HBV Model}
 \usage{
-hbv_pso_run(configpath, recursive = FALSE, suffix = NULL, gof.name = NULL,
-  from_validation = NULL, to_validation = NULL, ...)
+hbv_pso_run(
+  configpath,
+  recursive = FALSE,
+  suffix = NULL,
+  gof.name = NULL,
+  from_validation = NULL,
+  to_validation = NULL,
+  ...
+)
 }
 \arguments{
 \item{configpath}{character vector of full path and/or file names. Any file
@@ -86,7 +93,7 @@ parameters unique to \code{hbv_pso_run} can also be set in configuration files:
 \section{Input data definition}{
  For each optimization run, the following
 variables have to be defined and contain valid values as defined in
-\code{\link[=hbv_pso]{hbv_pso()}}: prec, airt, ep, obs, area, elev_zones. The input data
+\code{\link[=hbv_pso]{hbv_pso()}}: prec, airt, ep, obs, area. The input data
 can be assinged in the following ways (in descending order of precedence):
 \enumerate{
 \item \emph{assignment inside the configfile}: Add code which assigns the input

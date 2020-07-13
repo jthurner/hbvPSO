@@ -36,7 +36,7 @@
 #'
 #' @section Input data definition: For each optimization run, the following
 #'   variables have to be defined and contain valid values as defined in
-#'   [hbv_pso()]: prec, airt, ep, obs, area, elev_zones. The input data
+#'   [hbv_pso()]: prec, airt, ep, obs, area. The input data
 #'   can be assinged in the following ways (in descending order of precedence):
 #'
 #'   1. *assignment inside the configfile*: Add code which assigns the input
@@ -95,6 +95,8 @@
 hbv_pso_run <-
   function(configpath, recursive = FALSE, suffix = NULL, gof.name = NULL,
            from_validation = NULL, to_validation = NULL, ...) {
+  # TODO: abstract common tasks (e.g. ts loading) into util function
+  # TODO: plotting list<->TRUE conversion done in multiple places?
   start_time <- Sys.time()
   isdir <- sapply(configpath,function(x) file.info(x)$isdir)
   dirs <- configpath[isdir]
@@ -105,14 +107,15 @@ hbv_pso_run <-
                         pattern = "(?i)^run.*\\.R$")
   all_runs <-lapply(c(configs,configpath[!isdir]),hbv_pso_run_single,...)
   # build summary dataframe and remove from results
-  batch_summary <- do.call(rbind,lapply(all_runs, `[[`, 3))
-  all_runs = lapply(all_runs,`[`,1:2)
+  batch_summary <- do.call(rbind,lapply(all_runs, `[[`, "summary"))
+  batch_summary_par<- do.call(rbind,lapply(all_runs, `[[`, "summary_par"))
+  all_runs = lapply(all_runs,`[[`,"results")
   # flatten result list
   results <- unlist(all_runs,recursive = FALSE)
   run_time <- difftime(Sys.time(), start_time, units="secs")
   print(batch_summary)
   message("Execution time (hours:minutes:seconds): ",format(.POSIXct(run_time, tz="UTZ"), "%H:%M:%S"))
-  return(list(summary=batch_summary,results=results))
+  return(list(summary=batch_summary,summary_par = batch_summary_par, results=results))
 }
 
 #' Title
@@ -128,8 +131,9 @@ hbv_pso_run_single <- function(configfile,...){
   # TODO: find a away to allow setting nested parameters through ...,
   #       e.g. maxit inside hydroGOF_args$control? list merges?
   # TODO: error handling if read.zoo fails/produces unexpected results?
+  # TODO: test everything with non-ts inputs
 
-  base_path <- dirname(configfile)
+  print(paste("Running",configfile))
   config_env <- new.env()
   source(configfile, local = config_env, chdir = TRUE)
   list2env(list(...), envir = config_env)
@@ -161,8 +165,14 @@ hbv_pso_run_single <- function(configfile,...){
 
   suffix <- config_env$suffix
 
-  id <- paste(c(basename(base_path), gof.name, suffix), collapse = "_")
-  output_path <- file.path(base_path,id)
+  config_dir <- dirname(configfile)
+  id <- paste(c(basename(config_dir), gof.name, suffix), collapse = "_")
+  if (is.null(config_env$outpath)) {
+    output_path <- file.path(config_dir, "hbv", id)
+  } else {
+    output_path <- file.path(config_env$outpath, "hbv", id)
+  }
+
 
   # set sim-obs plot titles and file names to id
   sim_obs_fname <- paste0(id,".png")
@@ -175,13 +185,13 @@ hbv_pso_run_single <- function(configfile,...){
     }
   }
 
-  var_names <- c("prec","airt","ep","obs","area","elev_zones")
+  var_names <- c("prec","airt","ep","obs","area")
   # check for missing time series
   missing_vars <- var_names[sapply(var_names, function(x) is.null(config_env[[x]]))]
   if (length(missing_vars) > 0) {
     # read in missing data from csv files
-    vars_from_csv <- sapply(missing_vars, function(x, base_path) {
-      fp <- list.files(base_path, full.names = TRUE,
+    vars_from_csv <- sapply(missing_vars, function(x, config_dir) {
+      fp <- list.files(config_dir, full.names = TRUE,
                        pattern = paste0("(?i)", x, "(\\.csv|\\.txt)?$"))[1]
       if (!is.na(fp)) {
         return(zoo::read.zoo(fp))
@@ -189,16 +199,17 @@ hbv_pso_run_single <- function(configfile,...){
       else {
         return(NULL)
       }
-    }, simplify=FALSE, USE.NAMES=TRUE, base_path)
+    }, simplify=FALSE, USE.NAMES=TRUE, config_dir)
 
     list2env(vars_from_csv,envir=config_env)
     # read in missing data from hbv-light files
     missing_vars <- sapply(var_names, function(x) is.null(config_env[[x]]))
     if (any(missing_vars)) {
-        ts_from_hbv_light <- do.call(parse_hbv_light,c(hbv_light_dir=base_path,as.list(missing_vars)))
+        ts_from_hbv_light <- do.call(parse_hbv_light,c(hbv_light_dir=config_dir,as.list(missing_vars)))
         list2env(ts_from_hbv_light,envir=config_env)
     }
     missing_vars <- var_names[sapply(var_names, function(x) is.null(config_env[[x]]))]
+    #TODO: area is optional!
     if (length(missing_vars) > 0)
       stop("Could not find the following input data for " ,id, ": ",paste(missing_vars,collapse=","))
   }
@@ -210,7 +221,6 @@ hbv_pso_run_single <- function(configfile,...){
     airt = config_env$airt,
     ep = config_env$ep,
     area = config_env$area,
-    elev_zones = config_env$elev_zones,
     param = config_env$param,
     obs = config_env$obs,
     from = config_env$from,
@@ -234,7 +244,8 @@ hbv_pso_run_single <- function(configfile,...){
     hbv_pso_args$outpath <- file.path(output_path,"validation")
     hbv_pso_args$param <- optimized$pso_out$par
     hbv_pso_args$to <- config_env$to_validation
-    hbv_pso_args$warmup <- config_env$from_validation
+    hbv_pso_args$from <- config_env$from_validation
+    hbv_pso_args$warmup <- config_env$warmup_validation
 
     if(is.list(plotting)) {
       sim_obs_fname <- file.path(output_path, paste0(id,"_ggof-validation",".png"))
@@ -246,15 +257,27 @@ hbv_pso_run_single <- function(configfile,...){
     optimized_validation <- NULL
   }
 
-  summary <- data.frame(id = paste(c(basename(base_path),suffix),collapse = "-"),
-      gof_name = ifelse(is.null(gof.name),NA, gof.name),
-      gof = round(optimized$gof,3),
-      gof_validation = ifelse(is.null(optimized_validation),NA,round(optimized_validation$gof,3)),
-      from = ifelse(is.null(config_env$from),NA, config_env$from),
-      to = ifelse(is.null(config_env$to),NA, config_env$to),
-      from_validation = ifelse(is.null(config_env$from_validation),NA, config_env$from_validation),
-      to_validation = ifelse(is.null(config_env$to_validation),NA, config_env$to_validation),
-      stringsAsFactors = FALSE
+  summary_base <- data.frame(
+    id = paste(c(basename(config_dir),suffix),collapse = "-"),
+    gof_name = ifelse(is.null(gof.name),NA, gof.name),
+    gof = round(optimized$gof,3),
+    stringsAsFactors = FALSE
   )
-  return(setNames(list(optimized,optimized_validation,summary),c(id,paste0(id,"_validation"),"summary")))
+  summary_gof <- data.frame(
+    gof_validation = ifelse(
+      is.null(optimized_validation),NA,round(optimized_validation$gof,3)),
+    from = ifelse(is.null(config_env$warmup),config_env$from, config_env$warmup),
+    to = ifelse(is.null(config_env$to),NA, config_env$to),
+    from_validation = ifelse(
+      is.null(config_env$from_validation),NA, config_env$from_validation),
+    to_validation = ifelse(is.null(config_env$to_validation),NA, config_env$to_validation),
+    stringsAsFactors = FALSE
+  )
+
+  res <- list(results=list(),
+              summary=cbind(summary_base,summary_gof),
+              summary_par = cbind(summary_base,t(optimized$pso_out$par)))
+  res$results[[id]] <- optimized
+  res$results[[paste0(id,"_validation")]] <- optimized_validation
+  return(res)
 }

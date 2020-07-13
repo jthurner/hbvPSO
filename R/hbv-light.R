@@ -15,6 +15,7 @@
 #' @keywords internal
 #'
 #' @examples
+#' # TODO: ref ts if no ptq
 parse_hbv_light <- function(hbv_light_dir, prec=TRUE, airt=TRUE, ep=TRUE, obs=TRUE, area=TRUE, elev_zones=TRUE) {
   results <- list()
   ptq <- NULL
