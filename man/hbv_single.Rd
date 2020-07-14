@@ -15,7 +15,9 @@ hbv_single(
   incon = NULL,
   FUN_gof = hydroGOF::NSE,
   FUN_gof_args = NULL,
-  as_hydromod = TRUE
+  as_hydromod = TRUE,
+  par_fixed = NULL,
+  disable_tr = FALSE
 )
 }
 \arguments{

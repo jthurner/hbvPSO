@@ -79,6 +79,8 @@ hbv_pso <- function(prec = NULL,
                     ep = NULL,
                     area = 1,
                     param = hbvPSO::tuwmodel_params_default,
+                    disable_tr = FALSE,
+                    par_fixed = NULL,
                     obs = NULL,
                     from = NULL,
                     to = NULL,
@@ -110,6 +112,7 @@ hbv_pso <- function(prec = NULL,
     hydroPSO_args$control$write2disk <- TRUE
     hydroPSO_args$control$drty.out <- outpath
   }
+
   # set up hydroPSO defaults
   hydroPSO_args$control$MinMax <- "max"
 

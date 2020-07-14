@@ -27,9 +27,19 @@ hbv_single <-  function(prec,
                         incon = NULL,
                         FUN_gof = hydroGOF::NSE,
                         FUN_gof_args = NULL,
-                        as_hydromod = TRUE) {
+                        as_hydromod = TRUE,
+                        par_fixed = NULL,
+                        disable_tr = FALSE) {
 
   # TODO: hbv_out as vector?
+  # Add parameters excluded from optimization
+  if (!is.null(par_fixed)) {
+    param <- replace(par_fixed, is.na(par_fixed),param)
+  }
+  # if tr should not be used, set it to the value of ts
+  if (disable_tr) {
+    param[3] <- param[4]
+  }
   # run the model
   hbv_out <- TUWmodel::TUWmodel(prec, airt, ep, area, param)
   # remove warmup period from simulated Q
@@ -60,14 +70,14 @@ validate_input <- function(e) {
     e$param <- hbvPSO::tuwmodel_params_default
   }
 
-  if (NCOL(e$obs) != 1) {
+    if (NCOL(e$obs) != 1) {
     stop("Observed discharge (\"obs\") must be univariate")
   }
 
   # param has to be 15 rows long
-  e$param <- as.matrix(e$param)
-  nrow_par <- nrow(e$param)
-  ncol_par <- ncol(e$param)
+
+  nrow_par <- NROW(e$param) + sum(!is.na(e$par_fixed))
+  ncol_par <- NCOL(e$param)
   if ((nrow_par != 15) || (ncol_par > 2 || ncol_par < 1)) {
     stop("Wrong number of parameters in param")
   }

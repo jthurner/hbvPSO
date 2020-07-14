@@ -10,6 +10,8 @@ hbv_pso(
   ep = NULL,
   area = 1,
   param = hbvPSO::tuwmodel_params_default,
+  disable_tr = FALSE,
+  par_fixed = NULL,
   obs = NULL,
   from = NULL,
   to = NULL,
