@@ -153,6 +153,11 @@ hbv_pso_run_single <- function(configfile,...){
     config_env$gof.name <- "NSE"
   }
 
+  # make disable_tr default to FALSE
+  if (is.null(config_env$disable_tr)) {
+    config_env$FUN_gof_args <- FALSE
+  }
+
   # if defined, gof.name sets plotting$gof.name. if not, get it from plotting
   gof.name <- config_env$gof.name
   if (is.list(plotting)) {
@@ -214,6 +219,17 @@ hbv_pso_run_single <- function(configfile,...){
       stop("Could not find the following input data for " ,id, ": ",paste(missing_vars,collapse=","))
   }
 
+  param <- config_env$param
+
+  # make tr constant if only ts is used
+  if (config_env$disable_tr) {
+      param[3,] <- -99
+  }
+
+  # skip optimization for parameters where min==max
+  par_skip_optim <- param[,1] == param[,2]
+  param <- param[!par_skip_optim,]
+  par_fixed <- replace(param,!par_skip_optim,NA)[,1]
 
   # collecting arguments for hbv_pso
   hbv_pso_args <- list(
@@ -221,13 +237,13 @@ hbv_pso_run_single <- function(configfile,...){
     airt = config_env$airt,
     ep = config_env$ep,
     area = config_env$area,
-    param = config_env$param,
+    param = param,
+    disable_tr = config_env$disable_tr,
+    par_fixed = par_fixed,
     obs = config_env$obs,
     from = config_env$from,
     to = config_env$to,
     warmup = config_env$warmup,
-    pelev = config_env$pelev,
-    telev = config_env$telev,
     incon = config_env$incon,
     outpath = output_path,
     hydroPSO_args = config_env$hydroPSO_args,
