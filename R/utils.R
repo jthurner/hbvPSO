@@ -41,13 +41,19 @@ hbv_single <-  function(prec,
     param[3] <- param[4]
   }
   # run the model
-  hbv_out <- TUWmodel::TUWmodel(prec, airt, ep, area, param)
+  hbv_out <- TUWmodel::TUWmodel(zoo::coredata(prec), zoo::coredata(airt), zoo::coredata(ep), area, param)
   # remove warmup period from simulated Q
   # TODO: This fails for multi-zone!! use tail instead?
   sim <- as.numeric(hbv_out$q)[-(1:warmup)]
   # if there are any NA in qsim, directly return NA as GoF
   if (any(is.na(sim)) && as_hydromod)
     return(list(GoF=NA,model.out=NA))
+  # bail out if obs and qsim do not have the same length
+  if(length(obs)!=length(sim))
+    stop("simulated q has a differenth length than obs")
+  # convert sim to zoo if obs is a zoo object
+  if (is(obs,"zoo"))
+    sim <- zoo::zoo(sim, index(obs))
   FUN_gof_args = c(list(sim = sim, obs = obs), FUN_gof_args)
   gof <- (do.call(FUN_gof, FUN_gof_args))
   # combine sim and obs with any additional args to FUN_gof
@@ -162,9 +168,6 @@ validate_input <- function(e) {
   e$obs <- e$obs[-(1:e$warmup)]
 
   e$obs_zoo <- e$obs
-
-  # convert any zoo ts to vector/matrix
-  e[ts_names] <- lapply(e[ts_names], FUN = zoo::coredata)
 
   return(e)
 }
